@@ -1,8 +1,17 @@
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
-
+type Project = {
+    id: string;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+    userId: string;
+    status?: string;
+    API?: string;
+}
+// ... rest of the code ...
 export default async function ProjectPage({ params }: { params: { id: string } }) {
-    const project = await prisma.project.findUnique({
+    const project: Project | null = await prisma.project.findUnique({
         where: {
             id: params.id,
         },
