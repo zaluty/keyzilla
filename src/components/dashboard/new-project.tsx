@@ -18,10 +18,10 @@ import { cn } from "@/lib/utils"
 type Project = {
     id: string;
     name: string;
-
-
 }
+
 export type { Project }
+
 type GitHubProject = {
     id: number;
     name: string;
@@ -35,19 +35,40 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
     const [projectName, setProjectName] = useState("")
     const [githubProjects, setGithubProjects] = useState<GitHubProject[]>([])
     const [loading, setLoading] = useState(false)
+    const [existingProjects, setExistingProjects] = useState<string[]>([])
     const [open, setOpen] = useState(false)
     const [isSubmitting, setIsSubmitting] = useState(false)
 
     useEffect(() => {
-        fetchGithubProjects()
+        const fetchData = async () => {
+            const existingProjectNames = await fetchExistingProjects()
+            await fetchGithubProjects(existingProjectNames)
+        }
+        fetchData()
     }, [])
 
-    const fetchGithubProjects = async () => {
+    const fetchExistingProjects = async () => {
+        try {
+            const response = await fetch('/api/projects')
+            const data = await response.json()
+            const projectNames = data.map((project: Project) => project.name)
+            setExistingProjects(projectNames)
+            return projectNames
+        } catch (error) {
+            console.error('Error fetching existing projects:', error)
+            return []
+        }
+    }
+
+    const fetchGithubProjects = async (existingProjectNames: string[]) => {
         setLoading(true)
         try {
             const response = await fetch('/api/repos')
             const data = await response.json()
-            setGithubProjects(data)
+            const filteredProjects = data.filter((project: GitHubProject) =>
+                !existingProjectNames.includes(project.name)
+            )
+            setGithubProjects(filteredProjects)
         } catch (error) {
             console.error('Error fetching GitHub projects:', error)
         } finally {
@@ -66,8 +87,12 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
                 id: Date.now().toString(),
                 name: projectName,
             })
-            setOpen(false) // Close the dialog after successful submission
-            setProjectName("") // Reset the project name
+            setOpen(false)
+            setProjectName("")
+
+
+            const existingProjectNames = await fetchExistingProjects()
+            await fetchGithubProjects(existingProjectNames)
         } catch (error) {
             console.error('Error adding project:', error)
         } finally {
@@ -79,7 +104,7 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline">Add Project</Button>
+                <Button variant="outline" disabled={loading}>Add Project</Button>
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-md">

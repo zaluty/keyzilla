@@ -16,40 +16,32 @@ import { Breadcrumbd } from "@/components/dashboard/breadcrumb";
 export default function RootLayout({
     children,
 }: Readonly<{
-
     children: React.ReactNode;
 }>) {
-
     return (
         <ThemeProvider
             attribute="class"
-
             defaultTheme="dark"
             enableSystem
-
             disableTransitionOnChange
         >
-
             <div className="flex min-h-screen">
-
-
                 <Sidebar />
-
                 <NextTopLoader color="white" />
 
-
-                <div className="fixed left-0 m-4 top-0 flex items-center space-x-3">
-
-                    <div className="hidden md:block items-center space-x-3  ml-16"><Breadcrumbd /></div>
+                {/* New container for the top bar */}
+                <div className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 dark:border-gray-900 dark:bg-black p-4 flex justify-between items-center">
+                    <div className="flex items-center space-x-3">
+                        <div className="hidden md:block ml-16"><Breadcrumbd /></div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                        <SearchModal />
+                        <ModeToggle />
+                        <UserButton />
+                    </div>
                 </div>
 
-                <div className="fixed right-0 m-4 top-0 flex items-center space-x-3">
-                    <SearchModal />
-                    <ModeToggle />
-                    <UserButton />
-                </div>
-
-                <main className="flex-1 p-4 mt-16">{children}</main>
+                <main className="flex-1 p-4 mt-20">{children}</main>
             </div>
         </ThemeProvider>
     );

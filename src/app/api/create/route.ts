@@ -6,12 +6,12 @@ const prisma = new PrismaClient();
 export async function POST(request: NextRequest) {
     try {
         const { userId } = getAuth(request);
-        const { name } = await request.json();
+        const { name, language } = await request.json();
         console.log(userId, name);
         const project = await prisma.project.create({
             data: {
                 name,
-
+                language: language || 'Not specified',
                 userId: userId!,
             },
         });

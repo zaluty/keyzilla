@@ -8,12 +8,15 @@ datasource db {
 }
 
 model Project {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  apiKeys   Apikey[]
-  userId    String
+  id           String      @id @default(cuid())
+  name         String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  apiKeys      Apikey[]
+  userId       String
+  language     String
+  lastCommit   LastCommit? @relation(fields: [lastCommitId], references: [id])
+  lastCommitId String?
 }
 
 model Apikey {
@@ -21,4 +24,12 @@ model Apikey {
   key       String
   projectId String
   project   Project @relation(fields: [projectId], references: [id])
+}
+
+model LastCommit {
+  id      String    @id @default(cuid())
+  sha     String
+  message String
+  date    DateTime
+  Project Project[]
 }

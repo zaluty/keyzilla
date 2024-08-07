@@ -24,7 +24,6 @@ type Props = {
 }
 
 export default function ProjectDetails({ repo }: Props) {
-    const [envContent, setEnvContent] = useState<string>("")
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [apiKeyName, setApiKeyName] = useState<string>("")
     const [apiKeyValue, setApiKeyValue] = useState<string>("")
@@ -46,7 +45,8 @@ export default function ProjectDetails({ repo }: Props) {
         }
     }
 
-    const handleAddApiKey = async () => {
+    const handleAddApiKey = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault
         try {
             setIsLoading(true)
             const response = await axios.post('/api/addApiKey', {
@@ -87,15 +87,18 @@ export default function ProjectDetails({ repo }: Props) {
                         </div>
                     ) : (
                         <div>
-                            <Label>API Key Name</Label>
-                            <Input value={apiKeyName} onChange={(e) => setApiKeyName(e.target.value)} />
+                            <form onSubmit={handleAddApiKey}>
 
-                            <Label>API Key Value</Label>
-                            <Input value={apiKeyValue} onChange={(e) => setApiKeyValue(e.target.value)} />
+                                <Label>API Key Name</Label>
+                                <Input value={apiKeyName} onChange={(e) => setApiKeyName(e.target.value)} />
 
-                            <Button onClick={handleAddApiKey} disabled={isLoading}>
-                                {isLoading ? <Loader className="animate-spin" /> : 'Add API Key'}
-                            </Button>
+                                <Label>API Key Value</Label>
+                                <Input value={apiKeyValue} onChange={(e) => setApiKeyValue(e.target.value)} />
+
+                                <Button type="submit" disabled={isLoading}>
+                                    {isLoading ? <Loader className="animate-spin" /> : 'Add API Key'}
+                                </Button>
+                            </form>
                         </div>
                     )}
                 </SheetHeader>

@@ -9,7 +9,7 @@ type Project = {
     status?: string;
     API?: string;
 }
-// ... rest of the code ...
+
 export default async function ProjectPage({ params }: { params: { id: string } }) {
     const project: Project | null = await prisma.project.findUnique({
         where: {
