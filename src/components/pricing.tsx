@@ -16,7 +16,7 @@ interface PricingTabProps {
 
 export function PricingTab(props: PricingTabProps) {
   return (
-    <div className={`h-full `}>
+    <div className={`h-full lg:min-w-[400px] `}>
       <div className="relative flex flex-col h-full p-6 rounded-2xl bg-black border border-white/30 shadow shadow-black/80">
         {props.popular && (
           <div className="absolute top-0 right-0 mr-6 -mt-4">
@@ -57,66 +57,56 @@ export default function PricingTable() {
   const [isAnnual, setIsAnnual] = useState<boolean>(true)
 
   return (
-    <div>
+    <section id='pricing'>
+      <div>
 
-      {/* Pricing toggle */}
-      <div className="flex justify-center max-w-[14rem] m-auto mb-8 lg:mb-16">
-        <div className="relative flex w-full p-1 bg-black rounded-full">
-          <span className="absolute inset-0 m-1 pointer-events-none" aria-hidden="true">
-            <span className={`absolute inset-0 w-1/2 bg-[#5D2CA8] rounded-full shadow-sm shadow-[#5D2CA8] transform transition-transform duration-150 ease-in-out ${isAnnual ? 'translate-x-0' : 'translate-x-full'}`}></span>
-          </span>
-          <button className={`relative flex-1 text-sm font-medium h-8 rounded-full focus-visible:outline-none focus-visible:ring focus-visible:ring-slate-600 transition-colors duration-150 ease-in-out ${isAnnual ? 'text-white/70' : ' text-white'}`} onClick={() => setIsAnnual(true)} aria-pressed={isAnnual}>Yearly <span className={`${isAnnual ? 'text-indigo-200' : 'text-slate-400 dark:text-slate-500'}`}>-20%</span></button>
-          <button className={`relative flex-1 text-sm font-medium h-8 rounded-full focus-visible:outline-none focus-visible:ring focus-visible:ring-slate-600 transition-colors duration-150 ease-in-out ${isAnnual ? 'text-white/70' : ' text-white'}`} onClick={() => setIsAnnual(false)} aria-pressed={isAnnual}>Monthly</button>
+        {/* Pricing toggle */}
+        <div className="flex justify-center max-w-[14rem] m-auto mb-8 lg:mb-16">
+          <div className="relative flex w-full p-1 bg-black rounded-full">
+            <span className="absolute inset-0 m-1 pointer-events-none" aria-hidden="true">
+              <span className={`absolute inset-0 w-1/2 bg-[#5D2CA8] rounded-full shadow-sm shadow-[#5D2CA8] transform transition-transform duration-150 ease-in-out ${isAnnual ? 'translate-x-0' : 'translate-x-full'}`}></span>
+            </span>
+            <button className={`relative flex-1 text-sm font-medium h-8 rounded-full focus-visible:outline-none focus-visible:ring focus-visible:ring-slate-600 transition-colors duration-150 ease-in-out ${isAnnual ? 'text-white/70' : ' text-white'}`} onClick={() => setIsAnnual(true)} aria-pressed={isAnnual}>Yearly <span className={`${isAnnual ? 'text-indigo-200' : 'text-slate-400 dark:text-slate-500'}`}>-10%</span></button>
+            <button className={`relative flex-1 text-sm font-medium h-8 rounded-full focus-visible:outline-none focus-visible:ring focus-visible:ring-slate-600 transition-colors duration-150 ease-in-out ${isAnnual ? 'text-white/70' : ' text-white'}`} onClick={() => setIsAnnual(false)} aria-pressed={isAnnual}>Monthly</button>
+          </div>
         </div>
-      </div>
 
-      <div className="max-w-sm mx-auto grid gap-6 lg:grid-cols-3 items-start lg:max-w-none">
+        <div className="max-w-sm mx-auto grid gap-6 lg:grid-cols-2 items-start lg:max-w-none min-w-[400px]">
+          {/* Pricing tab 0 */}
+          <PricingTab
+            yearly={isAnnual}
+            planName="Essential"
+            price={{ yearly: 0, monthly: 0 }}
+            planDescription="Start for free "
+            features={[
+              '15 API keys',
 
-        {/* Pricing tab 1 */}
-        <PricingTab
-          yearly={isAnnual}
-          planName="Essential"
-          price={{ yearly: 29, monthly: 35 }}
-          planDescription="There are many variations available, but the majority have suffered."
-          features={[
-            'Unlimited placeholder texts',
-            'Consectetur adipiscing elit',
-            'Excepteur sint occaecat cupidatat',
-            'Officia deserunt mollit anim',
-          ]} />
+              '5 projects',
+              '3 members',
+              '1 organization'
+            ]} />
+          {/* Pricing tab 1 */}
+          <PricingTab
+            yearly={isAnnual}
+            planName="Advanced"
+            price={{ yearly: 20, monthly: 15 }}
+            planDescription=" unlimited use"
+            features={[
+              'Unlimited API keys',
 
-        {/* Pricing tab 2 */}
-        <PricingTab
-          yearly={isAnnual}
-          popular={true}
-          planName="Perform"
-          price={{ yearly: 49, monthly: 55 }}
-          planDescription="There are many variations available, but the majority have suffered."
-          features={[
-            'Unlimited placeholder texts',
-            'Consectetur adipiscing elit',
-            'Excepteur sint occaecat cupidatat',
-            'Officia deserunt mollit anim',
-            'Predefined chunks as necessary',
-          ]} />
+              'Unlimited projects',
+              'Unlimited team members',
+              'unlimited organizations'
+            ]} />
 
-        {/* Pricing tab 3 */}
-        <PricingTab
-          yearly={isAnnual}
-          planName="Enterprise"
-          price={{ yearly: 79, monthly: 85 }}
-          planDescription="There are many variations available, but the majority have suffered."
-          features={[
-            'Unlimited placeholder texts',
-            'Consectetur adipiscing elit',
-            'Excepteur sint occaecat cupidatat',
-            'Officia deserunt mollit anim',
-            'Predefined chunks as necessary',
-            'Free from repetition',
-          ]} />
+          {/* Pricing tab 2 */}
+
+          {/* Pricing tab 3 */}
+
+
+        </div>
 
       </div>
-
-    </div>
+    </section>
   )
 }

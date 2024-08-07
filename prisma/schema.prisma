@@ -1,0 +1,23 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "cockroachdb"
+  url      = env("DATABASE_URL")
+}
+
+model Project {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  apiKeys   Apikey[]
+}
+
+model Apikey {
+  id        String  @id @default(cuid())
+  key       String
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id])
+}

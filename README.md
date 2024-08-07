@@ -18,7 +18,7 @@
   </p>
 </div>
 
-<!-- ABOUT THE TEMPLATE -->
+<!-- ABOUT THE TEMPLATE -->a
 
 <div align="center mt-5">
 

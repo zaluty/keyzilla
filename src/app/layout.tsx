@@ -1,7 +1,12 @@
-import type { Metadata } from "next";
+import type { Metadata, } from "next";
 import { DM_Sans } from "next/font/google";
 import clsx from "clsx";
 import "./globals.css";
+import { ClerkProvider } from "@clerk/nextjs";
+import { cn } from "@/lib/utils";
+import { ThemeProvider } from "@/components/dashboard/darkMode";
+import { ModeToggle } from "@/components/dashboard/toggle";
+
 
 const dmSans = DM_Sans({ subsets: ["latin"] });
 
@@ -9,6 +14,10 @@ export const metadata: Metadata = {
   title: "Saas Template - EldoraUI",
   description: "Template for saas applications with dark theme",
 };
+const fontSans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+})
 
 export default function RootLayout({
   children,
@@ -16,8 +25,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={clsx(dmSans.className, "antialiased")}>{children}</body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+
+        <body
+          className={cn(
+            "min-h-screen bg-background font-sans antialiased",
+            fontSans.variable
+          )}
+
+        >
+
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ModeToggle />
+            {children}
+          </ThemeProvider>
+        </body>
+      </html>
+
+    </ClerkProvider>
   );
 }

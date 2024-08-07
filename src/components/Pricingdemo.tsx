@@ -9,13 +9,13 @@ export const Pricing = () => {
       <div className="container">
         <h2 className="text-center font-bold text-5xl sm:text-6xl tracking-tighter">Choose Your plan</h2>
         <div className='max-w-xl mx-auto'>
-        <p className="text-center mt-5 text-xl text-white/70">
-          Lorem ipsum dolor sit amet consectetur adipisicing elit. Eius, odit in facilis mollitia dolorum rerum.
-        </p>
+          <p className="text-center mt-5 text-xl text-white/70">
+            Check our generous plans
+          </p>
         </div>
         <div className="flex flex-col items-center justify-center sm:flex-row gap-4 px-24 py-[72px] sm:py-24  ">
-          <PricingTable/>
-          
+          <PricingTable />
+
 
         </div>
 
