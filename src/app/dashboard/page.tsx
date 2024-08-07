@@ -1,78 +1,95 @@
-'use client';
-import React, { useState, useCallback } from 'react';
-import ReactFlow, {
-    Node,
-    Edge,
-    Controls,
-    Background,
-    useNodesState,
-    useEdgesState,
-    addEdge,
-    NodeTypes,
-    NodeProps,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
-import { Button } from '@/components/ui/button';
+"use client"
+import { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
 import { AddProjectDialog } from '@/components/dashboard/new-project';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import ProjectDetails from '@/components/dashboard/projectDetails';
+import { ProjectSearch } from '@/components/dashboard/Projects-Search';
+import { Project as DialogProject } from '@/components/dashboard/new-project';
 
-// Custom node component
-const ProjectNode: React.FC<NodeProps> = ({ data }) => (
-    <div className="bg-white p-4 rounded-lg shadow-md">
-        <h3 className="font-bold">{data.label}</h3>
-        <p>Status: {data.status}</p>
-    </div>
-);
-
-const nodeTypes: NodeTypes = {
-    project: ProjectNode,
-};
-
-const initialNodes: Node[] = [
-
-    { id: '2', type: 'project', position: { x: 500, y: 300 }, data: { label: 'Project 2', status: 'Stopped', API: 'API' } },
-];
-
-const initialEdges: Edge[] = [];
-
-type Project = {
-    id: string;
-    name: string;
-    status: string;
-    API: string;
+type Project = DialogProject & {
+    userId: string;
 }
 
+export type { Project };
+
 export default function Dashboard() {
-    const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-    const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const onConnect = useCallback(({ params }: any) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+    console.log('Dashboard rendering, projects:', projects);
 
-    const addNewProject = (project: Project) => {
-        const newNode: Node = {
-            id: project.id,
-            type: 'project',
-            position: { x: Math.random() * 500, y: Math.random() * 500 },
-            data: { label: project.name, status: project.status, API: project.API },
-        };
-        setNodes((nds) => nds.concat(newNode));
-    };
+    const fetchProjects = useCallback(async () => {
+        console.log('Fetching projects');
+        setIsLoading(true);
+        try {
+            const response = await axios.get('/api/projects');
+            console.log('Fetched projects:', response.data);
+            setProjects(response.data);
+            setFilteredProjects(response.data);
+        } catch (error) {
+            console.error('Error fetching projects:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        console.log('Dashboard useEffect running');
+        fetchProjects();
+    }, [fetchProjects]);
+
+    const handleAddProject = useCallback(async (project: DialogProject) => {
+        console.log('Adding project:', project);
+        if (isLoading) return;
+        setIsLoading(true);
+        try {
+            const response = await axios.post('/api/create', project);
+            console.log('Project added:', response.data);
+            setProjects(prevProjects => {
+                console.log('Updating projects state');
+                return [...prevProjects, response.data];
+            });
+        } catch (error) {
+            console.error('Error adding project:', error);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [isLoading]);
+
+    const handleSearch = useCallback((searchedProjects: Project[]) => {
+        console.log('Search results:', searchedProjects);
+        setFilteredProjects(searchedProjects);
+    }, []);
 
     return (
-        <div style={{ width: '100vw', height: '100vh' }}>
-            <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                nodeTypes={nodeTypes}
-            >
-                <Controls />
-                <Background />
-            </ReactFlow>
-            <div className="absolute top-4 left-4">
-                <AddProjectDialog onAddProject={addNewProject} />
+        <>
+            <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+            <div className="flex justify-between items-center mb-6">
+
+                <ProjectSearch projects={projects} onSearch={handleSearch} />
+                <AddProjectDialog onAddProject={handleAddProject} />
             </div>
-        </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+                {isLoading ? (
+                    <p>Loading projects...</p>
+                ) : (
+                    filteredProjects.map((project) => (
+                        <div key={project.id} className="bg-white dark:bg-black dark:text-white p-6 rounded-lg shadow-md">
+                            <h2 className="text-xl font-semibold">{project.name}</h2>
+                            <p className="text-gray-500 mb-4">User ID: {project.userId}</p>
+                            <div className="flex justify-between items-center">
+                                <Link href={`/dashboard/project/${project.id}`}>
+                                    <Button>View</Button>
+                                </Link>
+                                <ProjectDetails repo={project.name} />
+                            </div>
+                        </div>
+                    ))
+                )}
+            </div>
+        </>
     );
 }

@@ -36,15 +36,9 @@ export default function RootLayout({
 
         >
 
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <ModeToggle />
-            {children}
-          </ThemeProvider>
+
+          {children}
+
         </body>
       </html>
 

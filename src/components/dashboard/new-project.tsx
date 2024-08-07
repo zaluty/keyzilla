@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react"
-import { Plus, ChevronDown } from "lucide-react"
+"use client"
+import { useState, useEffect, useCallback } from "react"
+import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     Dialog,
@@ -10,31 +11,33 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 
 type Project = {
     id: string;
     name: string;
-    status: string;
-    API: string;
+
+
 }
+export type { Project }
 type GitHubProject = {
     id: number;
     name: string;
 }
 
-export function AddProjectDialog({ onAddProject }: { onAddProject: (project: Project) => void }) {
+interface AddProjectDialogProps {
+    onAddProject: (project: Project) => void;
+}
+
+export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
     const [projectName, setProjectName] = useState("")
     const [githubProjects, setGithubProjects] = useState<GitHubProject[]>([])
     const [loading, setLoading] = useState(false)
+    const [open, setOpen] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
     useEffect(() => {
         fetchGithubProjects()
     }, [])
@@ -52,95 +55,71 @@ export function AddProjectDialog({ onAddProject }: { onAddProject: (project: Pro
         }
     }
 
-    const handleAddProject = async (closeDialog: () => void) => {
-        const newProject: Project = {
-            id: Date.now().toString(),
-            name: projectName,
-            status: "New",
-            API: 'd'
-        }
+    const handleAddProject = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+
+        if (isSubmitting) return
+        setIsSubmitting(true)
+        setLoading(true)
         try {
-            const response = await fetch('/api/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name: projectName }),
-            });
-            if (!response.ok) {
-                throw new Error('Failed to create project');
-            }
-            const createdProject = await response.json();
-            onAddProject(createdProject);
-            setProjectName("");
-            closeDialog();
+            await onAddProject({
+                id: Date.now().toString(),
+                name: projectName,
+            })
+            setOpen(false) // Close the dialog after successful submission
+            setProjectName("") // Reset the project name
         } catch (error) {
-            console.error('Error creating project:', error);
-            // Handle error (e.g., show error message to user)
+            console.error('Error adding project:', error)
+        } finally {
+            setIsSubmitting(false)
+            setLoading(false)
         }
-    }
+    }, [projectName, onAddProject, isSubmitting])
 
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline">Add Project</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                    <DialogTitle>Add New Project</DialogTitle>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="projectName" className="text-right">
-                            Project Name
-                        </Label>
-                        <div className="col-span-3 relative">
-                            <Input
-                                id="projectName"
-                                value={projectName}
-                                onChange={(e) => setProjectName(e.target.value)}
-                                className="pr-10"
-                            />
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="sm" className="absolute right-0 top-0 h-full">
-                                        <ChevronDown className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent
-                                    align="end"
-                                    className={cn(
-                                        "max-h-[200px] overflow-y-auto",
-                                        "scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100",
-                                        "dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800"
-                                    )}
-                                >
-                                    {githubProjects.map((project) => (
-                                        <DropdownMenuItem key={project.id} onSelect={() => setProjectName(project.name)}>
-                                            {project.name}
-                                        </DropdownMenuItem>
-                                    ))}
 
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+            <DialogContent className="sm:max-w-md">
+                <form onSubmit={handleAddProject}>
+                    <DialogHeader>
+                        <DialogTitle>Add New Project</DialogTitle>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                        <div className="grid grid-cols-4 items-center gap-4">
+                            <Label htmlFor="projectName" className="text-right">
+                                Project Name
+                            </Label>
+                            <div className="col-span-3 relative">
+                                <Select onValueChange={(value) => setProjectName(value)}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a project" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {githubProjects.map((project) => (
+                                            <SelectItem key={project.id} value={project.name}>
+                                                {project.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <DialogFooter>
-                    <DialogClose asChild>
-                        <Button type="button" variant="secondary">
+                    <DialogFooter>
+                        <Button type="button" variant="secondary" onClick={() => setOpen(false)}>
                             Cancel
                         </Button>
-                    </DialogClose>
-                    <DialogClose asChild>
-                        <Button onClick={(e) => {
-                            e.preventDefault()
-                            handleAddProject(() => { })
-                        }} disabled={!projectName}>
-                            Add Project
+                        <Button
+                            type="submit"
+                            disabled={!projectName || isSubmitting}
+                        >
+                            {isSubmitting ? 'Adding...' : 'Add Project'}
                         </Button>
-                    </DialogClose>
-                </DialogFooter>
+                    </DialogFooter>
+                </form>
             </DialogContent>
         </Dialog>
     )
