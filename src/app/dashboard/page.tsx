@@ -45,7 +45,7 @@ export default function Dashboard() {
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-    const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
+    const onConnect = useCallback(({ params }: any) => setEdges((eds) => addEdge(params, eds)), [setEdges]);
 
     const addNewProject = (project: Project) => {
         const newNode: Node = {

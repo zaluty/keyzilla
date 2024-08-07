@@ -24,8 +24,8 @@ type Project = {
     id: string;
     name: string;
     status: string;
+    API: string;
 }
-
 type GitHubProject = {
     id: number;
     name: string;
@@ -56,7 +56,8 @@ export function AddProjectDialog({ onAddProject }: { onAddProject: (project: Pro
         const newProject: Project = {
             id: Date.now().toString(),
             name: projectName,
-            status: "New"
+            status: "New",
+            API: 'd'
         }
         try {
             const response = await fetch('/api/create', {
