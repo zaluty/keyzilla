@@ -25,7 +25,7 @@ export function Sidebar() {
 
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="right">{user?.firstName}'s Dashboard</TooltipContent>
+              <TooltipContent side="right">{user?.firstName}&apos;s Dashboard</TooltipContent>
 
             </Tooltip>
 
