@@ -32,8 +32,8 @@ export const Navbar = () => {
               <a href="#Features" className='text-opacity-60 text-white hover:text-opacity-100 transition'>Features</a>
               <a href="#pricing" className='text-opacity-60 text-white hover:text-opacity-100 transition'>Pricing</a>
               <a href="#help" className='text-opacity-60 text-white hover:text-opacity-100 transition'>Help</a>
-              <a href="" className='text-opacity-60 text-white hover:text-opacity-100 transition'>Customers</a>
-              <a href="/docs" className='text-opacity-60 text-white hover:text-opacity-100 transition'>Customers</a>
+              <a href="#" className='text-opacity-60 text-white hover:text-opacity-100 transition'> Docs</a>
+
 
               <SignedOut>
                 <SignInButton mode='modal'>
