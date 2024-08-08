@@ -1,10 +1,6 @@
 /** @type {import('next').NextConfig} */
-import createMDX from 'fumadocs-mdx/config';
-
-const withMDX = createMDX();
-
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   webpack(config) {
     // Grab the existing rule that handles SVG imports
     const fileLoaderRule = config.module.rules.find((rule) =>
@@ -34,4 +30,4 @@ const nextConfig = {
   },
 };
 
-export default withMDX(nextConfig);
+export default nextConfig;
