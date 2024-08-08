@@ -28,10 +28,12 @@ type GitHubProject = {
 }
 
 interface AddProjectDialogProps {
+
     onAddProject: (project: Project) => void;
+    disabled: boolean
 }
 
-export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
+export function AddProjectDialog({ onAddProject, disabled }: AddProjectDialogProps) {
     const [projectName, setProjectName] = useState("")
     const [githubProjects, setGithubProjects] = useState<GitHubProject[]>([])
     const [loading, setLoading] = useState(false)
@@ -104,7 +106,8 @@ export function AddProjectDialog({ onAddProject }: AddProjectDialogProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="outline" disabled={loading}>Add Project</Button>
+                <Button variant="outline" disabled={loading || disabled}>Add Project</Button>
+
             </DialogTrigger>
 
             <DialogContent className="sm:max-w-md">

@@ -6,7 +6,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/dashboard/darkMode";
 import { ModeToggle } from "@/components/dashboard/toggle";
-
+import { RootProvider } from 'fumadocs-ui/provider'
+import NextTopLoader from "nextjs-toploader";
 
 const dmSans = DM_Sans({ subsets: ["latin"] });
 
@@ -34,10 +35,10 @@ export default function RootLayout({
             fontSans.variable
           )}
 
-        >
+        >  <NextTopLoader color="white" />
 
 
-          {children}
+          <RootProvider>{children}</RootProvider>
 
         </body>
       </html>

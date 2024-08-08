@@ -1,12 +1,14 @@
-
+"use client"
 import { SignedIn, SignedOut, SignInButton } from '@clerk/nextjs';
 import LogoImage from '../assets/icons/logo.svg';
 import MenuIcon from '../assets/icons/menu.svg';
 import Link from 'next/link';
 import { Button } from './ui/button';
+import { useState } from 'react';
 
 
 export const Navbar = () => {
+  const [open, setOpen] = useState()
   return (
     <div className="bg-black">
       <div className="px-4">
@@ -31,6 +33,8 @@ export const Navbar = () => {
               <a href="#pricing" className='text-opacity-60 text-white hover:text-opacity-100 transition'>Pricing</a>
               <a href="#help" className='text-opacity-60 text-white hover:text-opacity-100 transition'>Help</a>
               <a href="" className='text-opacity-60 text-white hover:text-opacity-100 transition'>Customers</a>
+              <a href="/docs" className='text-opacity-60 text-white hover:text-opacity-100 transition'>Customers</a>
+
               <SignedOut>
                 <SignInButton mode='modal'>
                   <button className='bg-white py-2 px-4 rounded-lg text-black'>Start for free</button>
