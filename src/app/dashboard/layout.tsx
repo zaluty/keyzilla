@@ -13,6 +13,8 @@ import { Sidebar } from "@/components/component/sidebar";
 import SearchModal from "@/components/dashboard/search";
 import NextTopLoader from "nextjs-toploader";
 import { Breadcrumbd } from "@/components/dashboard/breadcrumb";
+import FeedbackRating from "@/components/dashboard/feedback";
+import Feedback from "@/components/dashboard/feedback";
 export default function RootLayout({
     children,
 }: Readonly<{
@@ -36,9 +38,11 @@ export default function RootLayout({
                         <div className="hidden md:block ml-16"><Breadcrumbd /></div>
                     </div>
                     <div className="flex items-center space-x-3">
+                        <Feedback />
                         <SearchModal />
                         <ModeToggle />
                         <UserButton />
+
                     </div>
                 </div>
 

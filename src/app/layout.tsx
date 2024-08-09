@@ -6,10 +6,12 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/dashboard/darkMode";
 import { ModeToggle } from "@/components/dashboard/toggle";
+import { RootProvider } from 'fumadocs-ui/provider'
 import NextTopLoader from "nextjs-toploader";
 import FeedbackRating from "@/components/dashboard/feedback";
 
 const dmSans = DM_Sans({ subsets: ["latin"] });
+
 
 const fontSans = DM_Sans({
   subsets: ["latin"],
@@ -18,24 +20,27 @@ const fontSans = DM_Sans({
 
 export default function RootLayout({
   children,
-  theme,
 }: Readonly<{
   children: React.ReactNode;
-  theme: string;
 }>) {
   return (
     <ClerkProvider>
       <html lang="en">
+
         <body
           className={cn(
             "min-h-screen bg-background font-sans antialiased",
             fontSans.variable
           )}
-        >
-          <NextTopLoader color={theme === "dark" ? "white" : "black"} />
-          {children}
+
+        >  <NextTopLoader color="white" />
+
+
+          <RootProvider>{children}</RootProvider>
+
         </body>
       </html>
+
     </ClerkProvider>
   );
 }
