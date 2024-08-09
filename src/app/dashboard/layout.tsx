@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import { ThemeProvider } from "@/components/dashboard/darkMode";
 
 import { ModeToggle } from "@/components/dashboard/toggle";
-
+import { Toaster } from "sonner";
 import { Sidebar } from "@/components/component/sidebar";
 import SearchModal from "@/components/dashboard/search";
 import NextTopLoader from "nextjs-toploader";
@@ -25,6 +25,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
+            <Toaster richColors position="top-right" />
             <div className="flex min-h-screen">
                 <Sidebar />
                 <NextTopLoader color="white" />
