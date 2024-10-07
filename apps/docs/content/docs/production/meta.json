@@ -1,0 +1,9 @@
+{
+    "title": "Production",
+    "description": "How to use Keyzilla in production",
+    "pages": [
+        "vercel",
+        "railway",
+        "netlify"
+    ]
+}

@@ -1,0 +1,54 @@
+---
+title: Usage
+description: How to use Keyzilla
+---
+
+## Usage
+
+<Callout title="Heads up!" type="warn"> this guide assumes you have already [authenticated with Keyzilla](/docs/authentication)</Callout>
+Keyzilla is built with TypeScript and on top of the [t3-env](https://github.com/t3-oss/env-nextjs) package.
+This provides you with a type-safe `process.env` alternative, offering type safety and autocomplete right in your IDE.
+
+First, pull the projects from the dashboard with:
+
+```bash
+npx keyzilla pull
+```
+
+You'll be prompted to choose between your personal projects or your organization's projects:
+
+```bash
+? Select a project type:
+ > Personal
+ > Organization
+```
+
+Then, you'll be prompted to select the specific project you want to pull:
+
+```bash
+? Select a project:
+ > keyzilla
+   react-project
+   next-project
+   the-unfinished-project
+```
+
+In this example, we'll select `keyzilla`.
+
+This will pull the API keys and secrets and save them to a secret file in the `node_modules` directory of your project.
+
+To use these keys across your project, you can access them through the `k` object:
+
+```typescript
+const apiKey = k.DATABASE_URL;
+console.log(apiKey); // postgres://username:password@localhost:5432/database
+```
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,57 @@
+---
+title: Welcome to Keyzilla
+description:  Keyzilla???
+---
+
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+ 
+<Accordions>
+<Accordion title="What is Keyzilla?">
+ 
+Keyzilla is meant for developers who want to have an easy wazy yet secure to manage their API keys/secrets. 
+ 
+</Accordion>
+<Accordion title="Who can use Keyzilla?">
+ 
+Keyzilla can be used in organizations and personal projects too.
+
+</Accordion>
+<Accordion title="How does it work?">
+ 
+Keyzilla uses a CLI tool to pull your API keys/secrets from the Keyzilla dashboard and save them to a secret file in the `node_modules` directory of your project.
+</Accordion>
+<Accordion title="Is it secure?">
+keyzilla is secure as it uses `process.env.DATABASE_URL` instead of `k.DATABASE_URL` in production so  each key stays in it environment .
+ Learn more about how it works [here](/package/extend)
+ </Accordion>
+</Accordions>
+ 
+
+<Steps>
+<Step>
+ 
+### Install Keyzilla
+ 
+</Step>
+see [Installation](/docs/installation) for more information
+ ```bash
+ npm install keyzilla
+ ```
+<Step>
+ 
+### Authenticate
+ </Step>
+ see [Authentication](/docs/authentication) for more information
+ ```bash
+ npx keyzilla login
+ ```
+ <Step>
+ 
+### Pull your project
+ </Step>
+  see [Usage](/docs/usage) for more information
+  
+ ```bash
+ npx keyzilla  pull
+ ```
+</Steps>

@@ -1,0 +1,46 @@
+---
+title: Authentication
+description: How to authenticate with Keyzilla
+---
+
+ 
+
+
+## Authentication
+
+To authenticate with your Keyzilla account, you need the following:
+
+- A Keyzilla secret key ([get your secret key here](https://keyzilla.vercel.app/dashboard/settings/secrets))
+- The email address you used to create your Keyzilla account ([create an account here](https://keyzilla.vercel.app/sign-in))
+
+Once you have your secret key and email address, you can authenticate with the following command:
+
+```bash
+npx keyzilla login
+```
+
+You will be prompted to enter your email address and secret key:
+
+```bash
+Enter your email: 
+ > your-email@example.com
+Enter your secret key: 
+ > your-secret-key
+```
+<Callout title="Title">Hello World</Callout>
+## Logout
+
+To logout, use the following command:
+
+```bash
+npx keyzilla logout
+```
+
+You will be prompted to confirm the logout:
+
+```bash
+Are you sure you want to logout?  
+ > Yes  No
+```
+
+Choose "Yes" to confirm the logout.

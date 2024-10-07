@@ -1,0 +1,5 @@
+{
+    "title": "Keyzilla",
+    "description": "Keyzilla is a platform for managing keys and secrets in a secure and efficient manner.",
+    "pages": [ "---Development---", "installation", "authentication", "usage", "extend",  "remove", "---Production---", "production" ]
+}

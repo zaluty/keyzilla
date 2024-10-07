@@ -1,0 +1,47 @@
+---
+title: Extend
+description: How to extend Keyzilla
+---
+<Callout title="Heads up!" type="warn"> This guide assumes you are [authenticated](../docs/authentication) and have a [project pulled](../docs/usage) from the keyzilla dashboard </Callout>
+## Extend
+
+
+Keyzilla was built with extensibility in mind. You can extend Keyzilla with your own custom configurations.
+
+### What you can extend:
+
+- Key values
+- Key environments (server, client)
+
+### What you cannot extend:
+
+- Key names (to avoid conflicts)
+
+### How to extend Keyzilla
+
+1. Create a new file in the root of your project (optional). It's recommended to name it `keyzilla.config.ts`.
+
+2. Use the `keyzillaExtend` function to modify existing keys or add new ones:
+
+```js
+import { keyzillaExtend  as extend} from 'keyzilla';
+
+// Original configuration
+console.log(k.DATABASE_URL); // Outputs: original value
+
+// Extend the configuration
+const k = extend({  
+    "DATABASE_URL": {
+        "value": "new value",
+        "environments": "server"
+    }
+});
+
+// New configuration
+console.log(k.DATABASE_URL);  // Outputs: new value
+```
+
+To add a new key we recommende not using this package and instead use [t3-env](https://github.com/t3-oss/t3-env) directly as it is lighter and faster.
+
+<Callout title="Note" type="error"> If the key you  are trying to extend dosent exist in the projects you will get an error     `Key does not exist in ${project.name}`	</Callout>
+This example demonstrates how to change the value of an existing key (`DATABASE_URL`) and specify that it should only be available in the server environment.

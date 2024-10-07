@@ -1,0 +1,41 @@
+---
+title: Remove
+description: Remove the Keyzila package from your project
+---
+
+# Remove Keyzilla
+
+If you've decided to remove Keyzila from your project, you can do so by running:
+
+```bash
+npx keyzila remove
+```
+
+Keyzila is designed to remove itself from your project without leaving any trace. But that's not all! The removal process also:
+
+1. Removes the secret file from your `node_modules` folder
+2. Creates a `.env.local` file in your project root
+3. Adds all the keys you had in your project to the `.env.local` file
+4. Replaces all instances of Keyzila key access in your code
+
+For example, it will change:
+
+```ts
+const apiKey = k.DATABASE_URL
+```
+
+to:
+
+```ts
+const apiKey = process.env.DATABASE_URL || ""
+```
+
+OR 
+
+```ts
+const apiKey = import.meta.env.DATABASE_URL || ""
+```
+
+This ensures a smooth transition back to using environment variables directly.
+
+If you encounter any issues with the Keyzilla package or the removal process, please open an issue on [GitHub](https://github.com/zaluty/keyzila/issues/new/choose).
