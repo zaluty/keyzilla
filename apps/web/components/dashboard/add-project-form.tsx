@@ -33,6 +33,7 @@ import {
 import { useOrganization } from "@clerk/nextjs";
 import { ConvexError } from "convex/values";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import RoleBasedAccessDialog from "./Role-Based-Access";
 
 const formSchema = z.object({
   name: z
@@ -58,6 +59,8 @@ export default function AddProjectForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { organization } = useOrganization();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showRoleBasedDialog, setShowRoleBasedDialog] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -88,12 +91,14 @@ export default function AddProjectForm({
     setIsSubmitting(true);
     setSubmitError(null);
     try {
-      await createProject({
+      const projectId = await createProject({
         name: data.name,
         description: data.description,
         organizationId: organization?.id || "",
+        allowedUsers: selectedUsers, // Add this line
       });
       form.reset();
+      setSelectedUsers([]);
       onClose();
     } catch (error) {
       console.error("Failed to create project:", error);
@@ -109,6 +114,11 @@ export default function AddProjectForm({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleSaveUsers = (users: string[]) => {
+    setSelectedUsers(users);
+    setShowRoleBasedDialog(false);
   };
 
   const FormContent = (
@@ -145,6 +155,18 @@ export default function AddProjectForm({
           )}
         />
 
+        <Button
+          type="button"
+          onClick={() => setShowRoleBasedDialog(true)}
+          className="mb-4"
+        >
+          Select Users with Access
+        </Button>
+
+        {selectedUsers.length > 0 && (
+          <p>{selectedUsers.length} users selected</p>
+        )}
+
         {submitError && <p className="text-red-500">{submitError}</p>}
 
         <Button type="submit" disabled={isSubmitting}>
@@ -154,33 +176,38 @@ export default function AddProjectForm({
     </Form>
   );
 
-  if (isDesktop) {
-    return (
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New Project</DialogTitle>
-            <DialogDescription>
-              Create a new project by filling out the form below.
-            </DialogDescription>
-          </DialogHeader>
-          {FormContent}
-        </DialogContent>
-      </Dialog>
-    );
-  }
-
   return (
-    <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent>
-        <DrawerHeader>
-          <DrawerTitle>Add New Project</DrawerTitle>
-          <DrawerDescription>
-            Create a new project by filling out the form below.
-          </DrawerDescription>
-        </DrawerHeader>
-        <div className="px-4 pb-4">{FormContent}</div>
-      </DrawerContent>
-    </Drawer>
+    <>
+      {isDesktop ? (
+        <Dialog open={isOpen} onOpenChange={onClose}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Project</DialogTitle>
+              <DialogDescription>
+                Create a new project by filling out the form below.
+              </DialogDescription>
+            </DialogHeader>
+            {FormContent}
+          </DialogContent>
+        </Dialog>
+      ) : (
+        <Drawer open={isOpen} onOpenChange={onClose}>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>Add New Project</DrawerTitle>
+              <DrawerDescription>
+                Create a new project by filling out the form below.
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="px-4 pb-4">{FormContent}</div>
+          </DrawerContent>
+        </Drawer>
+      )}
+      <RoleBasedAccessDialog
+        isOpen={showRoleBasedDialog}
+        onOpenChange={setShowRoleBasedDialog}
+        onSave={handleSaveUsers}
+      />
+    </>
   );
 }

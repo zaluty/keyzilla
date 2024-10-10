@@ -54,7 +54,7 @@ export const k = env;
     packagePath = path.resolve(__dirname, '..', '..');
   } catch (error) {
     console.error('Error finding package path:', error);
-    return envConfig;
+    return null;
   }
 
   const distDir = path.join(packagePath, 'dist');
@@ -68,7 +68,6 @@ export const k = env;
 
   console.log(`Environment configuration written successfully  to ${envFilePath}`);
 
-  // Return the created env object for immediate use
   return envConfig;
 };
 

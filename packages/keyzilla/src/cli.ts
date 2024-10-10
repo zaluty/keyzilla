@@ -19,7 +19,8 @@ switch (command) {
     execSync(`node ${path.join(basePath, 'projects/main.js')}`, { stdio: 'inherit' });
     break;
   case 'remove':
-    execSync(`node ${path.join(basePath, 'remove/main.js')}`, { stdio: 'inherit' });
+    execSync(`node ${path.join(basePath, 'remove/index.js')}`, { stdio: 'inherit' });
+    console.log("running remoe ", path.join(basePath, 'remove/index.js'));
     break;
   default:
     console.log(`Unknown command: ${command} \n\n here is a list of commands: \n\n login: to login to the keyzilla platform \n\n logout: to logout from the keyzilla platform \n\n pull: to pull the projects from the keyzilla platform \n\n remove: to remove the project from your codebase\n\n`);

@@ -10,13 +10,11 @@
     "./extend": "./dist/extend.js"
   },
   "bin": {
-    "keyzilla": "dist/cli.js",
-    "keyzilla-login": "dist/cli.js",
-    "keyzilla-logout": "dist/cli.js",
-    "keyzilla-pull": "dist/cli.js"
+    "keyzilla": "./dist/projects/main.js"
   },
   "scripts": {
-    "build": "tsup --config tsup.config.ts",
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "start:dev": "tsup --watch",
@@ -46,9 +44,17 @@
     "whatwg-fetch": "^3.6.20",
     "zod": "^3.23.8"
   },
+  "peerDependencies": {
+    "@t3-oss/env-nextjs": "^0.11.1"
+  },
+  "peerDependenciesMeta": {
+    "@t3-oss/env-nextjs": {
+      "optional":  false
+    }
+  },
   "devDependencies": {
     "@clack/prompts": "^0.7.0",
-    "@t3-oss/env-nextjs": "^0.11.1",
+    "@t3-oss/env-nextjs": "^0.11.1",  
     "@types/whatwg-fetch": "^0.0.33",
     "tsup": "^8.2.4",
     "typescript": "^5.6.2"

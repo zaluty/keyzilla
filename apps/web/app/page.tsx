@@ -24,9 +24,53 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Footer } from "@/components/footer"; // Add this import
+import axios from "axios";
+import { TextHoverEffect } from "@/components/text-hover";
+
+async function getRepoStars(owner: string, repo: string): Promise<number> {
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/${owner}/${repo}`,
+      {
+        headers: process.env.GITHUB_OAUTH_TOKEN!
+          ? {
+              Authorization: `Bearer ${process.env.GITHUB_OAUTH_TOKEN}`,
+              "Content-Type": "application/json",
+            }
+          : {},
+        next: {
+          revalidate: 3600,
+        },
+      }
+    );
+    const data = await response.json();
+    console.log(data);
+    return data.stargazers_count;
+  } catch (error) {
+    console.error("Error fetching repository information:", error);
+    return -1;
+  }
+}
+
+// Usage
+getRepoStars("zaluty", "keyzilla").then((stars) => {
+  if (stars !== -1) {
+    console.log(`The 'keyzilla' repository by zaluty has ${stars} stars.`);
+  } else {
+    console.log("Failed to fetch repository information.");
+  }
+});
 
 export default function Home() {
   const r = useRouter();
+  const [stars, setStars] = useState(0);
+
+  useEffect(() => {
+    getRepoStars("zaluty", "keyzilla").then((stars) => {
+      setStars(stars);
+    });
+  }, []);
+
   function Herovideo() {
     return (
       <section className="max-w-5xl mx-auto h-screen flex flex-col justify-center items-center px-7 lg:px-0 relative">
@@ -41,18 +85,19 @@ export default function Home() {
       </section>
     );
   }
+
   return (
     <>
-      <div className="fixed inset-0 z-0">
-        <FLickeringBg />
-      </div>
       <div className="relative z-10">
         <header className="flex justify-between items-center p-4">
           <div className="logo text-xl font-bold">Keyzilla</div>
           <nav className="flex items-center space-x-4">
-            <Button asChild >
-              <Link href="/docs" about="docs" >Docs</Link>
+            <Button asChild>
+              <Link href="/docs" about="docs">
+                Docs
+              </Link>
             </Button>
+            <Button>{stars}</Button>
             <SignedOut>
               <SignInButton
                 mode="modal"
@@ -79,35 +124,31 @@ export default function Home() {
                 <Link href="/dashboard">Dashboard</Link>
               </Button>
               <UserButton />
-            </SignedIn> 
-            
+            </SignedIn>
+
             <ModeToggle />
           </nav>
         </header>
         <div className="text-sm sm:text-3xl flex flex-col items-center justify-center mt-20 relative">
-          <div className="relative z-10 flex flex-col items-center justify-center">
-            <h1 className="animate-fade-up bg-gradient-to-br from-indigo-700 via-accent-foreground to-fuchsia-500 bg-clip-text text-center text-3xl sm:text-5xl/[3rem] md:text-7xl/[5rem] font-bold text-transparent opacity-100 drop-shadow-sm m-6">
-              Framework agnostic encryption library for type-safe TypeScript
-              environments
-            </h1>
-            <h1 className="text-xs sm:text-sm mb-4">
-              Built on top of{" "}
-              <Link
-                className='text-blue-500 after:content-["↗"]  '
-                href="https://env.t3.gg"
-              >
-                T3 Env
-              </Link>
-              ,
-            </h1>
-            <Button>see Demo</Button>
-          </div>
-          <Hero />
-          <BentoGrid />
-          <WhatGif />
+          <TextHoverEffect text="Hello" />
+          <h1 className="text-xs sm:text-sm mb-4">
+            Built on top of{" "}
+            <Link
+              className='text-blue-500 after:content-["↗"]  '
+              href="https://env.t3.gg"
+            >
+              T3 Env
+            </Link>
+            ,
+          </h1>
+          <Button>see Demo</Button>
         </div>
+        <Hero />
+        <BentoGrid />
+
+        <WhatGif />
       </div>
-      <Footer /> {/* Add this line */}
+      <Footer />
     </>
   );
 }

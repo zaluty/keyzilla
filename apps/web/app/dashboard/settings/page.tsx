@@ -28,7 +28,7 @@ export default function SettingsPage() {
           condition={(has) =>
             has({
               permission: "org:sys_memberships:manage",
-            }) || !organization
+            })
           }
           fallback={<></>}
         >

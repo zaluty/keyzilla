@@ -89,41 +89,51 @@ export default function DashboardPage() {
   const totalPages = Math.max(2, Math.ceil(totalProjectCount / ITEMS_PER_PAGE));
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">
-        {organization?.name || "dashboard"}
-      </h1>
-      <div className="flex items-center justify-between space-x-4 mb-6">
-        <div className="flex-grow">
-          <ProjectSearch onSearch={handleSearch} disabled={isLoading} />
-        </div>
-        <Protect
-          condition={(has) =>
-            has({ permission: "org:sys_memberships:manage" }) || !organization
-          }
-          fallback={<></>}
-        >
-          <PopoverDemo
-            open={setIsAddProjectDialogOpen}
-            inviteUsers={setIsInviteUsersDialogOpen}
-            organization={organization as Organization}
-          />
-
-          <AddProjectForm
-            isOpen={isAddProjectDialogOpen}
-            onClose={handleCloseDialog}
-          />
-        </Protect>
-      </div>
-      <div className="mt-6">
-        {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(6)].map((_, index) => (
-              <Skeleton key={index} className="h-14 w-full" />
-            ))}
+    <div className="container mx-auto py-8 relative min-h-screen">
+      <div className="pb-16">
+        <h1 className="text-3xl font-bold mb-6">
+          {organization?.name ? (
+            <>
+              {organization?.name.charAt(0).toUpperCase() +
+                organization?.name.slice(1).toLowerCase()}{" "}
+              <span className="text-muted-foreground text-[9px]">
+                Organization account
+              </span>
+            </>
+          ) : (
+            "Dashboard"
+          )}
+        </h1>
+        <div className="flex items-center justify-between space-x-4 mb-6">
+          <div className="flex-grow">
+            <ProjectSearch onSearch={handleSearch} disabled={isLoading} />
           </div>
-        ) : results && results.length > 0 ? (
-          <>
+          <Protect
+            condition={(has) =>
+              has({ permission: "org:sys_memberships:manage" }) || !organization
+            }
+            fallback={<></>}
+          >
+            <PopoverDemo
+              open={setIsAddProjectDialogOpen}
+              inviteUsers={setIsInviteUsersDialogOpen}
+              organization={organization as Organization}
+            />
+
+            <AddProjectForm
+              isOpen={isAddProjectDialogOpen}
+              onClose={handleCloseDialog}
+            />
+          </Protect>
+        </div>
+        <div className="mt-6">
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[...Array(6)].map((_, index) => (
+                <Skeleton key={index} className="h-14 w-full" />
+              ))}
+            </div>
+          ) : results && results.length > 0 ? (
             <ProjectGrid
               projects={results.slice(
                 currentPage * ITEMS_PER_PAGE,
@@ -131,7 +141,35 @@ export default function DashboardPage() {
               )}
               searchTerm={searchTerm}
             />
-            <Pagination className="mt-6">
+          ) : (
+            <Protect
+              condition={(has) =>
+                has({ permission: "org:sys_memberships:manage" }) ||
+                !organization
+              }
+              fallback={<Fallback />}
+            >
+              <div className="flex flex-col items-center justify-center gap-4 text-center mt-12">
+                <p>Add your first project to get started</p>
+                <Button onClick={() => setIsAddProjectDialogOpen(true)}>
+                  Add Project
+                </Button>
+
+                <AddProjectForm
+                  isOpen={isAddProjectDialogOpen}
+                  onClose={handleCloseDialog}
+                />
+              </div>
+            </Protect>
+          )}
+        </div>
+      </div>
+
+      {/* Pagination fixed to the bottom of the viewport */}
+      {results && results.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 bg-background border-t">
+          <div className="container mx-auto py-4">
+            <Pagination>
               <PaginationContent>
                 <PaginationItem>
                   <PaginationPrevious
@@ -179,28 +217,10 @@ export default function DashboardPage() {
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
-          </>
-        ) : (
-          <Protect
-            condition={(has) =>
-              has({ permission: "org:sys_memberships:manage" }) || !organization
-            }
-            fallback={<Fallback />}
-          >
-            <div className="flex flex-col items-center justify-center gap-4 text-center mt-12">
-              <p>Add your first project to get started</p>
-              <Button onClick={() => setIsAddProjectDialogOpen(true)}>
-                Add Project
-              </Button>
+          </div>
+        </div>
+      )}
 
-              <AddProjectForm
-                isOpen={isAddProjectDialogOpen}
-                onClose={handleCloseDialog}
-              />
-            </div>
-          </Protect>
-        )}
-      </div>
       <InviteMember
         open={isInviteUsersDialogOpen}
         setOpen={setIsInviteUsersDialogOpen}
@@ -231,7 +251,7 @@ function PopoverDemo({
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" className="flex items-center space-x-2">
+        <Button variant="default" className="flex items-center space-x-2">
           <span>Add</span>
           <PlusIcon className="w-5 h-5" />
         </Button>

@@ -7,6 +7,7 @@ export default defineSchema({
         description: v.string(),
         createdAt: v.number(),
         updatedAt: v.number(),
+        allowedUsers: v.optional(v.array(v.string())),
         apiKeys: v.array(v.id("apiKeys")),
         userId: v.optional(v.string()),
         organizationId: v.optional(v.string()),
