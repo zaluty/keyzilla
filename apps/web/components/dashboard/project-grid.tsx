@@ -1,5 +1,6 @@
+"use client";
 import Link from "next/link";
-
+import { k } from "keyzilla";
 import { Protect, useOrganization, useUser, useAuth } from "@clerk/nextjs";
 import { Organization } from "@clerk/nextjs/server";
 import {
@@ -60,7 +61,6 @@ export default function ProjectGrid({
     </div>
   );
 }
-
 interface ProjectCardProps {
   project: Doc<"projects">;
 }

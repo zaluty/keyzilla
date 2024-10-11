@@ -4,7 +4,7 @@ import { ConvexError, v } from "convex/values";
 import { QueryCtx } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import { number } from "zod";
-import { getManyFrom } from "convex-helpers/server/relationships";
+import { getManyFrom,   } from "convex-helpers/server/relationships";
 
 /**
  * Create a new project
@@ -22,6 +22,7 @@ export const createProject = mutation({
         organizationId: v.optional(v.string()),
         allowedUsers: v.optional(v.array(v.string())),
     },
+
     handler: async (ctx, args) => {
         const identity = await ctx.auth.getUserIdentity();
         if (identity === null) {
@@ -86,25 +87,24 @@ export const getProjects = query({
             throw new Error("Not authenticated");
         } 
 
-        const userId: string[] = [identity.subject];
-        const userid = Array.from(userId) 
-        console.log(userid)
+        const userId = identity.subject;
+
         return ctx.db
             .query("projects")
             .filter((q) => {
                 if (args.organizationId) {
-                    return q.eq(q.field("organizationId"), args.organizationId), q.eq(q.field('allowedUsers'), userId)
+                    return q.eq(q.field("organizationId"), args.organizationId);
                 } else {
-                    return q.and(
-                        q.eq(q.field("allowedUsers"), userId),
-                        q.or( 
-                            q.eq(q.field("organizationId"), undefined),
-                            q.eq(q.field("organizationId"), null)
-                        )
+                    return q.or( 
+                        q.eq(q.field("organizationId"), undefined),
+                        q.eq(q.field("organizationId"), null)
                     );
                 }
-            }).order("desc")
-            .collect();
+            })
+            .collect()
+            .then(async (projects) => {
+                return projects.filter(project => project.allowedUsers?.includes(userId));
+            });
     },
 })
 
@@ -232,28 +232,26 @@ export const getPaginatedProjects = query({
             throw new ConvexError("Not authenticated");
         }
 
-        const userId: string[] = [identity.subject];
+        const userId = identity.subject;
 
-        return ctx.db
+        const projects = await ctx.db
             .query("projects")
             .filter((q) => {
                 if (args.organizationId) {
-                    return q.and(
-                        q.eq(q.field("organizationId"), args.organizationId),
-                        q.eq(q.field("allowedUsers"), userId)
-                    );
+                    return q.eq(q.field("organizationId"), args.organizationId);
                 } else {
-                    return q.and(   
-                        q.eq(q.field("allowedUsers"), userId),
-                        q.or(
-                            q.eq(q.field("organizationId"), undefined),
-                            q.eq(q.field("organizationId"), null)
-                        )
+                    return q.or(
+                        q.eq(q.field("organizationId"), undefined),
+                        q.eq(q.field("organizationId"), null)
                     );
                 }
             })
-            .order("desc")
             .paginate(args.paginationOpts);
+
+        return {
+            ...projects,
+            page: projects.page.filter(project => project.allowedUsers?.includes(userId))
+        };
     },
 })
 

@@ -2,33 +2,34 @@ import { v } from "convex/values";
 import { query } from "./_generated/server";
 
 export const getProjects = query({
-    args: { organizationId: v.string(),
-         userId: v.string(),
-         email: v.string() 
-     },
+    args: { organizationId: v.optional(v.string()), enabled: v.optional(v.boolean()) },
     handler: async (ctx, args) => {
-       if(!args.userId && !args.email){
-        throw new Error("UserId or Email is required");
-        }
-        const userId = args.userId; 
+        const identity = await ctx.auth.getUserIdentity();
+        if (identity === null) {
+            throw new Error("Not authenticated");
+        } 
+
+        const userId = identity.subject;
+
         return ctx.db
             .query("projects")
             .filter((q) => {
                 if (args.organizationId) {
                     return q.eq(q.field("organizationId"), args.organizationId);
                 } else {
-                    return q.and(
-                        q.eq(q.field("userId"), userId),
-                        q.or(
-                            q.eq(q.field("organizationId"), undefined),
-                            q.eq(q.field("organizationId"), null)
-                        )
+                    return q.or( 
+                        q.eq(q.field("organizationId"), undefined),
+                        q.eq(q.field("organizationId"), null)
                     );
                 }
-            }).order("desc")
-            .collect();
+            })
+            .collect()
+            .then(async (projects) => {
+                return projects.filter(project => project.allowedUsers?.includes(userId));
+            });
     },
 })
+
 
 export const getApiKeys = query({
     args: { projectId: v.id("projects") },
@@ -40,42 +41,34 @@ export const getApiKeys = query({
             .collect();
     }
 });
-
 export const getCliProjects = query({
-    args: { userId: v.string(), organizationId: v.optional(v.string()) },
+    args: { organizationId: v.optional(v.string()), enabled: v.optional(v.boolean()) },
     handler: async (ctx, args) => {
-        if (!args.userId) {
-            return [];
-        }
-        const projects = await ctx.db
+        const identity = await ctx.auth.getUserIdentity();
+        if (identity === null) {
+            throw new Error("Not authenticated");
+        } 
+
+        const userId = identity.subject;
+
+        return ctx.db
             .query("projects")
             .filter((q) => {
                 if (args.organizationId) {
                     return q.eq(q.field("organizationId"), args.organizationId);
                 } else {
-                    return q.and(
-                        q.eq(q.field("userId"), args.userId),
-                        q.or(
-                            q.eq(q.field("organizationId"), args.organizationId),
-                            q.eq(q.field("organizationId"), null)
-                        )
+                    return q.or( 
+                        q.eq(q.field("organizationId"), undefined),
+                        q.eq(q.field("organizationId"), null)
                     );
                 }
-            }).order("desc")
-            .collect();
-
-        // Fetch API keys for each project
-        const projectsWithApiKeys = await Promise.all(projects.map(async (project) => {
-            const apiKeys = await ctx.db
-                .query("apiKeys")
-                .filter((q) => q.eq(q.field("projectId"), project._id))
-                .collect();
-            return { ...project, apiKeys };
-        }));
-
-        return projectsWithApiKeys;
+            })
+            .collect()
+            .then(async (projects) => {
+                return projects.filter(project => project.allowedUsers?.includes(userId));
+            });
     },
-});
+})
 
 export const verify = query({
     args: { secretKey: v.string(), userId: v.string() },
