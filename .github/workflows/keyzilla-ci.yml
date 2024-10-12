@@ -4,11 +4,17 @@ on:
   push:
     branches: [main]
     paths:
-      - "packages/keyzilla/**"
+      - "@keyzilla/**"
   pull_request:
     branches: [main]
     paths:
-      - "packages/keyzilla/**"
+      - "@keyzilla/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
 
 jobs:
   build:
@@ -20,16 +26,25 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [14.x, 16.x, 18.x]
+        node-version: [lts/*]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
-          cache-dependency-path: packages/keyzilla/package.json
-      - run: npm ci
-      - run: npm run build --if-present
-      - run: npm test
+          cache-dependency-path: "packages/keyzilla/package.json"
+      - run: npm audit signatures
+      - name: Install dependencies
+        run: npm install
+      - name: Run build
+        run: npm run build
+      - name: Run tests
+        run: npm test
+      - name: Publish to npm
+        run: npm run semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
