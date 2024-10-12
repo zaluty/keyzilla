@@ -1,6 +1,6 @@
 {
   "name": "keyzilla",
-  "version": "2.0.0-dev",
+  "version": "0.0.16",
   "description": "gain a global access over your api keys ",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
