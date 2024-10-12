@@ -127,13 +127,7 @@ export const OrgSwitcher = () => {
             </li>
           ))}
         </ul>
-        <Link
-          href="/dashboard"
-          onClick={() => setOpen(false)}
-          className="flex items-center justify-center w-full    p-2 text-sm text-muted-foreground"
-        >
-          Return to Dashboard
-        </Link>
+
         {userMemberships.hasNextPage && (
           <Button
             variant="ghost"

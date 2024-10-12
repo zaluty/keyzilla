@@ -10,12 +10,19 @@ import { UserData } from "../types/userData";
 import { BASE_URL } from "../constants/urls";
 import { handleCancellation } from "../helpers/cancel";
 import { ErrorResponse } from "../types/error";
-console.log("Starting authentication process..."); // Added logging
+import { Organization } from "../types/org";
 
+console.log("Starting authentication process..."); 
+
+
+// this is the main function that handles the authentication process
+// we first check if the user is authenticated by checking the cache 
+// so we won't have to repeat the login 1process
+// if the user 
 export async function authenticate(): Promise<UserData | null> {
   const cachedAuth = await checkAuthentication();
   if (cachedAuth) {
-    console.log("Using cached authentication."); // Added logging
+    console.log("✅ Using cached authentication");  
     return cachedAuth;
   }
 
@@ -40,7 +47,7 @@ export async function authenticate(): Promise<UserData | null> {
     saveAuthCache(verifiedUserData);
     console.log(
       `Authentication successful, run npx keyzilla pull to get your keys`
-    ); // Added logging
+    );  
     return verifiedUserData;
   } catch (error) {
     console.error("Authentication failed:", getErrorMessage(error));
@@ -50,7 +57,7 @@ export async function authenticate(): Promise<UserData | null> {
 }
 
 async function fetchUserId(email: string): Promise<UserData> {
-  console.log(`Fetching user ID for email: ${email}`); // Added logging
+  console.log(`Fetching user ID for email: ${email}`);  
   const response = await fetch(`${BASE_URL}/api/cli?email=${email}`, {
     method: "GET",
     headers: {
@@ -64,23 +71,31 @@ async function fetchUserId(email: string): Promise<UserData> {
 
   const data = (await response.json()) as UserData;
 
-  if (typeof data.userId === "string") {
+  if (typeof data.userId === "string" && Array.isArray(data.organizations)) {
     return data;
-  } else if (data.userId && typeof data.userId === "object") {
-    throw new Error("Invalid user ID received from server");
   } else {
-    throw new Error("Invalid user ID received from server");
+    throw new Error("Invalid user data received from server");
   }
 }
 
+
+
+// this function prompts the user for their email and secret code
+// it returns an object with the email and secret code
+// if the user cancels the prompt, it returns null
+// !!!!!!!!TODO!!!!!!: add a check to see if the email is valid
+// if you have any questions about this code, please ask me in github issues
 async function promptCredentials(): Promise<{
   email: string;
   secretCode: string;
 } | null> {
   const email = await text({
     message: "Please enter your email:",
-    validate: (input) =>
-      input.trim() !== "" ? undefined : "Email cannot be empty",
+    validate: (input) => {
+      if (input.trim() === "") return "Email cannot be empty";
+      if (!isValidEmail(input)) return "Please enter a valid email address";
+      return undefined;
+    },
   });
 
   if (isCancel(email)) {
@@ -100,10 +115,16 @@ async function promptCredentials(): Promise<{
   return { email: email as string, secretCode: secretCode as string };
 }
 
+// Helper function to validate email format
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
 async function verifyUser(
   userId: string,
   secretCode: string,
-  organizations: any[]
+  organizations: Organization[]
 ): Promise<UserData> {
   console.log(`Verifying user ID: ${userId}`); // Added logging
   const response = await fetch(`${BASE_URL}/api/verify`, {
@@ -144,6 +165,10 @@ async function verifyUser(
   }
 }
 
+
+
+// this function checks if the data is an error response
+// you know some new-bee code wrote this (me) so don't judge too hard
 function isErrorResponse(data: unknown): data is ErrorResponse {
   return (
     typeof data === "object" &&
@@ -153,6 +178,7 @@ function isErrorResponse(data: unknown): data is ErrorResponse {
   );
 }
 
+// this function checks if the data is a user data object
 function isUserData(data: unknown): data is UserData {
   if (typeof data !== "object" || data === null) {
     return false;
@@ -173,11 +199,25 @@ function isUserData(data: unknown): data is UserData {
     return false;
   }
 
-  if (!Array.isArray(organizations)) {
+  if (!Array.isArray(organizations) || !organizations.every(isOrganization)) {
     return false;
   }
 
   return true;
+}
+
+// this function checks if the data is an organization object
+// when we get the response from the server  we need to check if the organizations are valid
+// without this check we would get a runtime error
+
+function isOrganization(org: unknown): org is Organization {
+  if (typeof org !== "object" || org === null) {
+    return false;
+  }
+
+  const { id, name } = org as Partial<Organization>;
+
+  return typeof id === "string" && typeof name === "string";
 }
 
 function getErrorMessage(error: unknown): string {
@@ -185,7 +225,8 @@ function getErrorMessage(error: unknown): string {
   return String(error);
 }
 
-// Start the authentication process
+// Start the authentication process and catch any errors if they occur
+// this is the entry point of the auth process 
 authenticate().catch((error) => {
-  console.error("Unexpected error:", error);
+  console.error("Unexpected error:", error as Error);
 });

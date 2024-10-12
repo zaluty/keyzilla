@@ -246,6 +246,7 @@ export const getPaginatedProjects = query({
                     );
                 }
             })
+            .order("desc")
             .paginate(args.paginationOpts);
 
         return {
@@ -286,3 +287,12 @@ export const updateProjectAllowedUsers = mutation({
         return updatedProject;
     },
 });
+
+export const getProjectUsers = query({
+    args: { projectId: v.id("projects") },
+    handler: async (ctx, args) => {
+        const project = await ctx.db.get(args.projectId);
+        return project?.allowedUsers;
+    }
+
+})

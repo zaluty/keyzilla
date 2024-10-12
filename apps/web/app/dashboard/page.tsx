@@ -8,11 +8,7 @@ import { api } from "@/convex/_generated/api";
 import ProjectGrid from "@/components/dashboard/project-grid";
 import ProjectSearch from "@/components/dashboard/project-search";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  OrganizationSwitcher,
-  useOrganization,
-  UserButton,
-} from "@clerk/nextjs";
+import { useOrganization } from "@clerk/nextjs";
 import { Protect } from "@clerk/clerk-react";
 import {
   Pagination,
@@ -22,7 +18,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { getProjects } from "@/convex/projects";
 import {
   Popover,
   PopoverContent,

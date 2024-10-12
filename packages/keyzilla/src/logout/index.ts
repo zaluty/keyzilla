@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 import { confirm, isCancel } from "@clack/prompts";
 import { handleCancellation } from "../helpers/cancel";
 import { clearAuthData, isAlreadyLoggedOut } from "./lib/deleteTmp";

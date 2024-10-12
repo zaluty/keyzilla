@@ -13,7 +13,7 @@
     "keyzilla": "./dist/projects/main.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsup --config tsup.config.ts --watch",
     "prepublishOnly": "npm run build",
     "test": "vitest",
     "test:watch": "vitest --watch",

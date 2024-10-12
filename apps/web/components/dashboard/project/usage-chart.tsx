@@ -16,7 +16,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-
+import { Id } from "@/convex/_generated/dataModel";
 export const description = "An interactive bar chart";
 
 const chartData = [
@@ -127,7 +127,13 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export default function UsageChart() {
+export default function UsageChart({
+  projectId,
+  projectName,
+}: {
+  projectId: Id<"projects">;
+  projectName: string;
+}) {
   const [activeChart, setActiveChart] =
     React.useState<keyof typeof chartConfig>("desktop");
 
@@ -143,9 +149,9 @@ export default function UsageChart() {
     <Card>
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-          <CardTitle>Bar Chart - Interactive</CardTitle>
+          <CardTitle>{projectName}</CardTitle>
           <CardDescription>
-            Showing total visitors for the last 3 months
+            Showing total activity for the last 3 months
           </CardDescription>
         </div>
         <div className="flex">

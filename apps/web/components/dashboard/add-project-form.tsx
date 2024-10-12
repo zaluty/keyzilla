@@ -33,7 +33,7 @@ import {
 import { useOrganization } from "@clerk/nextjs";
 import { ConvexError } from "convex/values";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import RoleBasedAccessDialog from "./Role-Based-Access";
+import RoleBasedAccessCard from "./Role-Based-Access";
 
 const formSchema = z.object({
   name: z
@@ -44,6 +44,9 @@ const formSchema = z.object({
     .string()
     .min(2, "Description must be at least 2 characters")
     .max(50, "Description must be less than 50 characters"),
+  allowedUsers: z
+    .array(z.string())
+    .min(1, "At least one user must be selected"),
 });
 
 interface AddProjectFormProps {
@@ -59,14 +62,13 @@ export default function AddProjectForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { organization } = useOrganization();
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [showRoleBasedDialog, setShowRoleBasedDialog] = useState(false);
-  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       description: "",
+      allowedUsers: [],
     },
   });
 
@@ -95,10 +97,9 @@ export default function AddProjectForm({
         name: data.name,
         description: data.description,
         organizationId: organization?.id || "",
-        allowedUsers: selectedUsers, // Add this line
+        allowedUsers: data.allowedUsers,
       });
       form.reset();
-      setSelectedUsers([]);
       onClose();
     } catch (error) {
       console.error("Failed to create project:", error);
@@ -114,11 +115,6 @@ export default function AddProjectForm({
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleSaveUsers = (users: string[]) => {
-    setSelectedUsers(users);
-    setShowRoleBasedDialog(false);
   };
 
   const FormContent = (
@@ -154,19 +150,22 @@ export default function AddProjectForm({
             </FormItem>
           )}
         />
-
-        <Button
-          type="button"
-          onClick={() => setShowRoleBasedDialog(true)}
-          className="mb-4"
-        >
-          Select Users with Access
-        </Button>
-
-        {selectedUsers.length > 0 && (
-          <p>{selectedUsers.length} users selected</p>
-        )}
-
+        <FormField
+          control={form.control}
+          name="allowedUsers"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Allowed Users</FormLabel>
+              <FormControl>
+                <RoleBasedAccessCard
+                  currentAllowedUsers={field.value}
+                  onUsersChange={field.onChange}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         {submitError && <p className="text-red-500">{submitError}</p>}
 
         <Button type="submit" disabled={isSubmitting}>
@@ -203,11 +202,6 @@ export default function AddProjectForm({
           </DrawerContent>
         </Drawer>
       )}
-      <RoleBasedAccessDialog
-        isOpen={showRoleBasedDialog}
-        onOpenChange={setShowRoleBasedDialog}
-        onSave={handleSaveUsers}
-      />
     </>
   );
 }

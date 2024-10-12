@@ -30,5 +30,6 @@ export default defineSchema({
         createdAt: v.number(),
         updatedAt: v.number(),
     })
+  
 });
 

@@ -16,7 +16,16 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Code, Copy, Info, Key, Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  Code,
+  Copy,
+  Info,
+  Key,
+  Pencil,
+  Plus,
+  Trash2,
+} from "lucide-react";
 import { toast } from "sonner";
 import React from "react";
 import { Doc, Id } from "@/convex/_generated/dataModel";
@@ -39,6 +48,7 @@ import {
   DrawerFooter,
 } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import Users from "@/components/dashboard/project/users";
 export const dynamic = "force-dynamic";
 
 export default function ProjectPage({ params }: { params: { name: string } }) {
@@ -138,11 +148,20 @@ export default function ProjectPage({ params }: { params: { name: string } }) {
     <div className="container mx-auto py-8 space-y-8">
       <Card className="bg-card text-card-foreground">
         <CardHeader className="flex flex-col gap-y-4 p-6 bg-card text-card-foreground rounded-lg shadow-lg">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-4xl font-extrabold">
-              {project.name}
-            </CardTitle>
-            <ImportantNotice />
+          <div className="flex flex-col items-start gap-y-4">
+            <Link
+              href="/dashboard"
+              className="flex items-center hover:text-default-foreground transition-colors group"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1" />
+              Dashboard
+            </Link>
+            <div className="flex items-center justify-between w-full">
+              <CardTitle className="text-4xl font-extrabold">
+                {project.name}
+              </CardTitle>
+              <ImportantNotice />
+            </div>
           </div>
           <p className="text-lg opacity-90">{project.description}</p>
         </CardHeader>
@@ -152,7 +171,7 @@ export default function ProjectPage({ params }: { params: { name: string } }) {
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="api-keys">API Keys</TabsTrigger>
           <TabsTrigger value="usage">Usage</TabsTrigger>
-          <TabsTrigger value="logs">Logs</TabsTrigger>
+          <TabsTrigger value="users">Users</TabsTrigger>
 
           {organization ? (
             <Protect role="org:admin">
@@ -270,12 +289,14 @@ export default function ProjectPage({ params }: { params: { name: string } }) {
           </Card>
         </TabsContent>
         <TabsContent value="usage">
-          <UsageChart />
+          <UsageChart projectId={project._id} projectName={project.name} />
         </TabsContent>
         <TabsContent value="settings">
           <Settings project={project} />
         </TabsContent>
-        <TabsContent value="logs"></TabsContent>
+        <TabsContent value="users">
+          <Users projectId={project._id} />
+        </TabsContent>
       </Tabs>
       {selectedApiKey && (
         <EditApiKey

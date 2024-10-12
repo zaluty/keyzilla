@@ -4,6 +4,14 @@ import { ApiKey } from "../types/apikeys";
 import fs from 'fs';
 import path from 'path';
 
+
+// this function parses the environment variables
+// it takes an array of api keys as an argument
+// and returns an object with the environment variables
+// it is used to generate the env.ts file
+// the env.ts file is used to type the environment variables
+// ? how about we bundle the env.ts file within the keyzilla dist file and then edit it with the api keys?
+
 const parseEnv = (apiKeys: ApiKey[]) => {
   const envConfig = {
     client: Object.fromEntries(
