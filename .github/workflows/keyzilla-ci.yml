@@ -1,0 +1,35 @@
+name: Keyzilla CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/keyzilla/**"
+  pull_request:
+    branches: [main]
+    paths:
+      - "packages/keyzilla/**"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: packages/keyzilla
+
+    strategy:
+      matrix:
+        node-version: [14.x, 16.x, 18.x]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: packages/keyzilla/package.json
+      - run: npm ci
+      - run: npm run build --if-present
+      - run: npm test
