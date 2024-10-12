@@ -29,7 +29,24 @@ export default function RoleBasedAccessCard({
   const { user } = useUser();
   const [selectedUsers, setSelectedUsers] =
     useState<string[]>(currentAllowedUsers);
+
+  const filteredMemberships = useMemo(() => {
+    return (
+      memberships?.data?.filter(
+        (membership) => membership.publicUserData.userId !== user?.id
+      ) || []
+    );
+  }, [memberships?.data, user?.id]);
+
+  const scrollAreaHeight = useMemo(() => {
+    const userCount = filteredMemberships.length;
+    const baseHeight = 50; // Height of a single user item
+    const maxHeight = 300; // Maximum height of the scroll area
+    return Math.min(userCount * baseHeight, maxHeight);
+  }, [filteredMemberships.length]);
+
   if (!organization) return null;
+
   const handleUserToggle = (userId: string) => {
     const updatedUsers = selectedUsers.includes(userId)
       ? selectedUsers.filter((id) => id !== userId)
@@ -38,25 +55,11 @@ export default function RoleBasedAccessCard({
     onUsersChange(updatedUsers);
   };
 
-  const scrollAreaHeight = useMemo(() => {
-    const userCount = memberships?.data?.length || 0;
-    const baseHeight = 50; // Height of a single user item
-    const maxHeight = 300; // Maximum height of the scroll area
-    return Math.min(userCount * baseHeight, maxHeight);
-  }, [memberships?.data?.length]);
-
-  const filteredMemberships = useMemo(() => {
-    return memberships?.data?.filter(
-      (membership) => membership.publicUserData.userId !== user?.id
-    );
-  }, [memberships?.data, user?.id]);
-
   const handleSelectAll = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault(); // Prevent form submission
-    const allUserIds =
-      filteredMemberships?.map(
-        (membership) => membership.publicUserData.userId!
-      ) || [];
+    const allUserIds = filteredMemberships.map(
+      (membership) => membership.publicUserData.userId!
+    );
     const newSelectedUsers =
       selectedUsers.length === allUserIds.length ? [] : allUserIds;
     setSelectedUsers(newSelectedUsers);
