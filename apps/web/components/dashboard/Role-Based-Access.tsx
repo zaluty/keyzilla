@@ -128,8 +128,9 @@ function InfoIcon() {
         </TooltipTrigger>
         <TooltipContent>
           <p className="w-64">
-            Only users you select will have access to this project. You don't
-            see yourself because you are the one creating the project.
+            Only users you select will have access to this project. You
+            don&apos;t see yourself because you are the one creating the
+            project.
           </p>
         </TooltipContent>
       </Tooltip>

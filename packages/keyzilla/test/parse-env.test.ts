@@ -12,8 +12,8 @@ describe('parseEnv', () => {
     vi.spyOn(path, 'resolve').mockReturnValue('/mocked/path');
     vi.spyOn(path, 'join').mockImplementation((...args) => args.join('/'));
     vi.spyOn(fs, 'existsSync').mockReturnValue(false);
-    vi.spyOn(fs, 'mkdirSync').mockImplementation(() => {});
-    vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {});
+    vi.spyOn(fs, 'mkdirSync').mockImplementation(() => undefined);
+    vi.spyOn(fs, 'writeFileSync').mockImplementation(() => undefined);
   });
 
   afterEach(() => {
