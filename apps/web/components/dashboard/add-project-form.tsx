@@ -30,11 +30,11 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { useOrganization } from "@clerk/nextjs";
+import { Protect, useOrganization } from "@clerk/nextjs";
 import { ConvexError } from "convex/values";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import RoleBasedAccessCard from "./Role-Based-Access";
-
+import { useUser } from "@clerk/nextjs";
 const formSchema = z.object({
   name: z
     .string()
@@ -44,9 +44,9 @@ const formSchema = z.object({
     .string()
     .min(2, "Description must be at least 2 characters")
     .max(50, "Description must be less than 50 characters"),
-  allowedUsers: z
-    .array(z.string())
-    .min(1, "At least one user must be selected"),
+  allowedUsers: z.optional(
+    z.array(z.string()).min(0, "At least one user must be selected")
+  ),
 });
 
 interface AddProjectFormProps {
@@ -62,7 +62,7 @@ export default function AddProjectForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { organization } = useOrganization();
   const [submitError, setSubmitError] = useState<string | null>(null);
-
+  const user = useUser();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -89,7 +89,7 @@ export default function AddProjectForm({
     };
   }, [onClose]);
 
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
@@ -97,12 +97,11 @@ export default function AddProjectForm({
         name: data.name,
         description: data.description,
         organizationId: organization?.id || "",
-        allowedUsers: data.allowedUsers,
+        allowedUsers: organization ? data.allowedUsers : [user?.user?.id || ""],
       });
       form.reset();
       onClose();
     } catch (error) {
-      console.error("Failed to create project:", error);
       if (error instanceof ConvexError) {
         setSubmitError(error.data || error.message);
         form.setFocus("name");
@@ -115,7 +114,7 @@ export default function AddProjectForm({
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }
 
   const FormContent = (
     <Form {...form}>
@@ -150,22 +149,27 @@ export default function AddProjectForm({
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="allowedUsers"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Allowed Users</FormLabel>
-              <FormControl>
-                <RoleBasedAccessCard
-                  currentAllowedUsers={field.value}
-                  onUsersChange={field.onChange}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        {organization && (
+          <Protect role="org:admin">
+            <FormField
+              control={form.control}
+              name="allowedUsers"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Allowed Users</FormLabel>
+                  <FormControl>
+                    <RoleBasedAccessCard
+                      currentAllowedUsers={field.value}
+                      onUsersChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormDescription>Select users with access </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </Protect>
+        )}
         {submitError && <p className="text-red-500">{submitError}</p>}
 
         <Button type="submit" disabled={isSubmitting}>

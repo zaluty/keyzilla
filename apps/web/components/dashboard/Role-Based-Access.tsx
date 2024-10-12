@@ -21,7 +21,7 @@ export default function RoleBasedAccessCard({
   currentAllowedUsers = [],
   onUsersChange,
 }: RoleBasedAccessCardProps) {
-  const { memberships } = useOrganization({
+  const { memberships, organization } = useOrganization({
     memberships: {
       infinite: true,
     },
@@ -29,7 +29,7 @@ export default function RoleBasedAccessCard({
   const { user } = useUser();
   const [selectedUsers, setSelectedUsers] =
     useState<string[]>(currentAllowedUsers);
-
+  if (!organization) return null;
   const handleUserToggle = (userId: string) => {
     const updatedUsers = selectedUsers.includes(userId)
       ? selectedUsers.filter((id) => id !== userId)

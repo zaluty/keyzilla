@@ -201,7 +201,7 @@ describe('fetchProjects', () => {
     const result = await fetchProjects(
       'org',
       'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw'
-    );
+    ); 
     expect(result).toEqual(mockProjects);
   });
 
