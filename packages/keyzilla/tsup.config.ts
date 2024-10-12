@@ -28,5 +28,4 @@ node-domexception/index.js:
 */`,
   },
   external: ['src/env/**'],
-  watch: true,
 });
