@@ -13,6 +13,7 @@
     "keyzilla": "./dist/projects/main.js"
   },
   "scripts": {
+    "prettier": "prettier --write",
     "build": "tsup --config tsup.config.ts --watch",
     "prepublishOnly": "npm run build",
     "test": "vitest",

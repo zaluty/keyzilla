@@ -179,13 +179,17 @@ describe('fetchProjects', () => {
   it('should fetch projects successfully', async () => {
     const mockProjects = [
       {
-        _creationTime: 1727022812193.9285,
-        _id: 'j979c0m1hry5jeyvq1fhjkxpgh718kb6',
+        _creationTime: 1728770426996.0417,
+        _id: 'j973ecshr15m5g12dmemjxc42172hz4f',
+        allowedUsers: [
+          'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
+          'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
+        ],
         apiKeys: [],
-        createdAt: 1727022812194,
-        description: 'meant for tests',
+        createdAt: 1728770426996,
+        description: 'test',
         name: 'keyzilla',
-        updatedAt: 1727022812194,
+        updatedAt: 1728770426996,
         userId: 'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
         userName: 'Hamza',
         userProfile:
@@ -201,7 +205,7 @@ describe('fetchProjects', () => {
     const result = await fetchProjects(
       'org',
       'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw'
-    ); 
+    );
     expect(result).toEqual(mockProjects);
   });
 
@@ -216,13 +220,17 @@ describe('fetchProjects', () => {
 
     const mockProjects = [
       {
-        _creationTime: 1727022812193.9285,
-        _id: 'j979c0m1hry5jeyvq1fhjkxpgh718kb6',
+        _creationTime: 1728770426996.0417,
+        _id: 'j973ecshr15m5g12dmemjxc42172hz4f',
+        allowedUsers: [
+          'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
+          'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
+        ],
         apiKeys: [],
-        createdAt: 1727022812194,
-        description: 'meant for tests',
+        createdAt: 1728770426996,
+        description: 'test',
         name: 'keyzilla',
-        updatedAt: 1727022812194,
+        updatedAt: 1728770426996,
         userId: 'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
         userName: 'Hamza',
         userProfile:
