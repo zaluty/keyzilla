@@ -39,7 +39,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
           cache-dependency-path: packages/keyzilla/package.json
-      - run: npm audit signature
+      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
+        run: npm audit signature
       - name: Install dependencies
         run: npm install
       - name: Run build
