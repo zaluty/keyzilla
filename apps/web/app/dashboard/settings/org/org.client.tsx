@@ -106,48 +106,6 @@ export default function Organization() {
 
   const dataLoaded = useRef(false);
 
-  if (!canManage)
-    return (
-      <>
-        <OrganizationProfile routing="hash" />
-      </>
-    );
-
-  // we need to handle the dialog action based on the type
-  // if the type is delete we need to delete the organization
-  // if the type is revoke we need to revoke the invitation
-  // if the type is remove we need to remove the user
-  const handleAction = async () => {
-    if (!dialogAction) return;
-
-    if (dialogAction.type === "revoke") {
-      await revokeInvitation(dialogAction.id);
-    } else if (dialogAction.type === "remove") {
-      await removeUser(dialogAction.id);
-    } else if (dialogAction.type === "delete") {
-      await deleteOrganization();
-    }
-
-    setDialogAction(null);
-  };
-
-  const deleteOrganization = async () => {
-    try {
-      await organization?.destroy();
-      router.refresh();
-      router.push("/dashboard/settings");
-      toast({
-        title: "Organization deleted",
-        description: "Your organization has been successfully deleted.",
-      });
-    } catch (error) {
-      toast({
-        title: "Error deleting organization",
-        description: "An error occurred while deleting the organization.",
-        variant: "destructive",
-      });
-    }
-  };
   const fetchData = useCallback(async () => {
     if (!organization || dataLoaded.current) return;
 
@@ -185,11 +143,57 @@ export default function Organization() {
     } finally {
       setLoading(false);
     }
-  }, [organization]);
+  }, [organization, toast]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData, organization]); // Add organization to the dependency array
+    if (canManage) {
+      fetchData();
+    }
+  }, [fetchData, canManage]);
+
+  if (!canManage) {
+    return (
+      <>
+        <OrganizationProfile routing="hash" />
+      </>
+    );
+  }
+
+  // we need to handle the dialog action based on the type
+  // if the type is delete we need to delete the organization
+  // if the type is revoke we need to revoke the invitation
+  // if the type is remove we need to remove the user
+  const handleAction = async () => {
+    if (!dialogAction) return;
+
+    if (dialogAction.type === "revoke") {
+      await revokeInvitation(dialogAction.id);
+    } else if (dialogAction.type === "remove") {
+      await removeUser(dialogAction.id);
+    } else if (dialogAction.type === "delete") {
+      await deleteOrganization();
+    }
+
+    setDialogAction(null);
+  };
+
+  const deleteOrganization = async () => {
+    try {
+      await organization?.destroy();
+      router.refresh();
+      router.push("/dashboard/settings");
+      toast({
+        title: "Organization deleted",
+        description: "Your organization has been successfully deleted.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error deleting organization",
+        description: "An error occurred while deleting the organization.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (!organization) return null;
 
