@@ -8,6 +8,7 @@
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
   },
   "devDependencies": {
+    "@types/react-syntax-highlighter": "^15.5.13",
     "prettier": "^3.2.5",
     "turbo": "^2.1.2",
     "typescript": "^5.4.5"
@@ -27,6 +28,7 @@
     "convex": "^1.16.2",
     "convex-helpers": "^0.1.60",
     "mailto-link": "^2.0.0",
+    "react-syntax-highlighter": "^15.5.0",
     "three": "^0.169.0"
   }
 }
