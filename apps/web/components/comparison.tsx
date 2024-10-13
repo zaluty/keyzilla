@@ -39,14 +39,14 @@ function ComparisonGrid() {
 
 function ComparisonBlock({ title, code }: { title: string; code: string }) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full">
       <h2 className="text-2xl font-semibold">{title}</h2>
-      <div className="bg-card rounded-lg overflow-hidden shadow-lg">
+      <div className="bg-card rounded-lg overflow-hidden shadow-lg h-[calc(100%-2rem)]">
         <SyntaxHighlighter
           language="typescript"
           style={atomOneDark}
-          customStyle={{ padding: "1.5rem" }}
-          className="text-sm md:text-base"
+          customStyle={{ padding: "1.5rem", height: "100%" }}
+          className="text-sm md:text-base h-full"
         >
           {code}
         </SyntaxHighlighter>

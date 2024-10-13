@@ -24,20 +24,13 @@ export default function SettingsPage() {
           description="Update your personal information"
           href="/dashboard/settings/profile"
         />
-        <Protect
-          condition={(has) =>
-            has({
-              permission: "org:sys_memberships:manage",
-            })
-          }
-          fallback={<></>}
-        >
+        {organization && (
           <SettingsCard
             title="Organizations"
             description="Manage your organization settings"
             href="/dashboard/settings/org"
           />
-        </Protect>
+        )}
         <SettingsCard
           title="Support"
           description="Get help and support"

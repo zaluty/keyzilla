@@ -1,5 +1,10 @@
 "use client";
-import { useOrganization, useOrganizationList, useUser } from "@clerk/nextjs";
+import {
+  OrganizationProfile,
+  Protect,
+  useOrganization,
+  useAuth,
+} from "@clerk/nextjs";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { format } from "date-fns";
@@ -41,6 +46,13 @@ import {
 } from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 interface Invitation {
   id: string;
   emailAddress: string;
@@ -75,24 +87,31 @@ export default function Organization() {
     email: string;
     confirm: string;
   } | null>(null);
-  const { user } = useUser();
-  const { isLoaded, userMemberships, setActive } = useOrganizationList({
-    userMemberships: userMembershipsParams,
-  });
-
-  const dataLoaded = useRef(false);
+  const { has } = useAuth();
 
   const [orgMembers, setOrgMembers] = useState<
     OrganizationMembershipResource[]
   >([]);
-
   const [dialogAction, setDialogAction] = useState<{
     type: "revoke" | "remove" | "delete";
     id: string;
     email: string;
   } | null>(null);
-
   const [openDrawer, setOpenDrawer] = useState<string | null>(null);
+
+  const canManage =
+    has &&
+    (has({ permission: "org:team_settings:manage" }) ||
+      has({ role: "org:admin" }));
+
+  const dataLoaded = useRef(false);
+
+  if (!canManage)
+    return (
+      <>
+        <OrganizationProfile routing="hash" />
+      </>
+    );
 
   // we need to handle the dialog action based on the type
   // if the type is delete we need to delete the organization
@@ -230,6 +249,38 @@ export default function Organization() {
     }
   };
 
+  const updateUserRole = async (userId: string, newRole: string) => {
+    try {
+      if (organization) {
+        await organization.updateMember({
+          userId,
+          role: newRole,
+        });
+
+        // Update the local state
+        setOrgMembers((prevMembers) =>
+          prevMembers.map((member) =>
+            member.publicUserData.userId === userId
+              ? { ...member, role: newRole }
+              : member
+          )
+        );
+
+        await memberships?.revalidate?.();
+        toast({
+          title: "Role updated",
+          description: "The user's role has been successfully updated.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error updating role",
+        description: "An error occurred while updating the user's role.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="space-y-4 p-4 sm:space-y-6 sm:p-6">
       <Tabs defaultValue="members">
@@ -258,10 +309,8 @@ export default function Organization() {
             Danger Zone
           </TabsTrigger>
         </TabsList>
-
+        <InviteMember open={open} setOpen={setOpen} />
         <TabsContent value="members">
-          <InviteMember open={open} setOpen={setOpen} />
-
           <Card>
             <CardHeader>
               <CardTitle>Organization Members</CardTitle>
@@ -283,55 +332,110 @@ export default function Organization() {
                 <TableBody>
                   {orgMembers.map((member) => (
                     <TableRow key={member.id}>
-                      <Drawer
-                        open={openDrawer === member.id}
-                        onOpenChange={(open) =>
-                          setOpenDrawer(open ? member.id : null)
-                        }
-                      >
-                        <DrawerTrigger asChild>
-                          <TableCell className="cursor-pointer hover:bg-muted">
-                            {member.publicUserData.identifier}
-                          </TableCell>
-                        </DrawerTrigger>
-                        <DrawerContent>
-                          <DrawerHeader className="border-b pb-4">
-                            <DrawerTitle className="text-xl font-bold">
-                              Member Details
-                            </DrawerTitle>
-                          </DrawerHeader>
-                          <div className="p-6 space-y-4">
-                            <div className="grid grid-cols-2 gap-2">
-                              <p className="font-semibold">Email:</p>
-                              <p>{member.publicUserData.identifier}</p>
-                              <p className="font-semibold">Role:</p>
-                              <p>{formatRole(member.role)}</p>
-                              <p className="font-semibold">Joined:</p>
-                              <p>{format(new Date(member.createdAt), "PPP")}</p>
+                      {isMobile ? (
+                        <Drawer
+                          open={openDrawer === member.id}
+                          onOpenChange={(open) =>
+                            setOpenDrawer(open ? member.id : null)
+                          }
+                        >
+                          <DrawerTrigger asChild>
+                            <TableCell className="cursor-pointer hover:bg-muted">
+                              {member.publicUserData.identifier}
+                            </TableCell>
+                          </DrawerTrigger>
+                          <DrawerContent>
+                            <DrawerHeader className="border-b pb-4">
+                              <DrawerTitle className="text-xl font-bold">
+                                Member Details
+                              </DrawerTitle>
+                            </DrawerHeader>
+                            <div className="p-6 space-y-4">
+                              <div className="grid grid-cols-2 gap-2">
+                                <p className="font-semibold">Email:</p>
+                                <p>{member.publicUserData.identifier}</p>
+                                <p className="font-semibold">Role:</p>
+                                <Protect
+                                  condition={(has) =>
+                                    has({
+                                      permission: "org:sys_memberships:manage",
+                                    }) || !organization
+                                  }
+                                  fallback={<></>}
+                                >
+                                  <Select
+                                    defaultValue={member.role}
+                                    onValueChange={(newRole) =>
+                                      updateUserRole(
+                                        member.publicUserData.userId!,
+                                        newRole
+                                      )
+                                    }
+                                  >
+                                    <SelectTrigger className="w-[180px]">
+                                      <SelectValue placeholder="Select a role" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="org:admin">
+                                        Admin
+                                      </SelectItem>
+                                      <SelectItem value="org:member">
+                                        Member
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </Protect>
+                                <p className="font-semibold">Joined:</p>
+                                <p>
+                                  {format(new Date(member.createdAt), "PPP")}
+                                </p>
+                              </div>
                             </div>
-                          </div>
-                          <DrawerFooter className="border-t pt-4">
-                            {member.role !== "org:admin" && (
-                              <Button
-                                variant="destructive"
-                                className="w-full"
-                                onClick={() => {
-                                  setDialogAction({
-                                    type: "remove",
-                                    id: member.publicUserData.userId!,
-                                    email: member.publicUserData.identifier,
-                                  });
-                                  setOpenDrawer(null);
-                                }}
-                              >
-                                Remove Member
-                              </Button>
-                            )}
-                          </DrawerFooter>
-                        </DrawerContent>
-                      </Drawer>
+                            <DrawerFooter className="border-t pt-4">
+                              {member.role !== "org:admin" && (
+                                <>
+                                  <Button
+                                    variant="destructive"
+                                    className="w-full"
+                                    onClick={() => {
+                                      setDialogAction({
+                                        type: "remove",
+                                        id: member.publicUserData.userId!,
+                                        email: member.publicUserData.identifier,
+                                      });
+                                      setOpenDrawer(null);
+                                    }}
+                                  >
+                                    Remove Member
+                                  </Button>
+                                </>
+                              )}
+                            </DrawerFooter>
+                          </DrawerContent>
+                        </Drawer>
+                      ) : (
+                        <TableCell>
+                          {member.publicUserData.identifier}
+                        </TableCell>
+                      )}
                       <TableCell className="hidden sm:table-cell">
-                        {formatRole(member.role)}
+                        <Select
+                          defaultValue={member.role}
+                          onValueChange={(newRole) =>
+                            updateUserRole(
+                              member.publicUserData.userId!,
+                              newRole
+                            )
+                          }
+                        >
+                          <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Select a role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="org:admin">Admin</SelectItem>
+                            <SelectItem value="org:member">Member</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">
                         {format(new Date(member.createdAt), "PPP")}
@@ -393,7 +497,7 @@ export default function Organization() {
                   <TableBody>
                     {invitations.map((invitation) => (
                       <TableRow key={invitation.id}>
-                        {isMobile && (
+                        {isMobile ? (
                           <Drawer
                             open={openDrawer === invitation.id}
                             onOpenChange={(open) =>
@@ -458,10 +562,9 @@ export default function Organization() {
                               </DrawerFooter>
                             </DrawerContent>
                           </Drawer>
+                        ) : (
+                          <TableCell>{invitation.emailAddress}</TableCell>
                         )}
-                        <TableCell className="hidden sm:table-cell">
-                          {invitation.emailAddress}
-                        </TableCell>
                         <TableCell className="hidden sm:table-cell">
                           {formatRole(invitation.role)}
                         </TableCell>

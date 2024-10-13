@@ -45,7 +45,7 @@ export function Settings({ children }: { children: React.ReactNode }) {
             </Link>
             <Protect
               condition={(has) =>
-                has({ permission: "org:sys_memberships:manage" })
+                has({ role: "org:member" }) || has({ role: "org:admin" })
               }
               fallback={<></>}
             >

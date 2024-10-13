@@ -40,11 +40,14 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { X } from "lucide-react";
 
 const inviteFormSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  emails: z.string().min(1, "At least one email is required"),
   role: z.string().min(1, "Role is required"),
 });
+
 export const OrgMembersParams = {
   memberships: {
     pageSize: 5,
@@ -65,17 +68,6 @@ interface InviteMemberProps {
   setOpen: (open: boolean) => void;
 }
 
-/*************  ✨ Codeium Command ⭐  *************/
-/**
- * A dialog to invite a new member to the organization. The dialog is only
- * rendered when the organization is loaded, and the user has the necessary
- * permissions to invite new members.
- *
- * @param open - Whether the dialog is currently open.
- * @param setOpen - A function to set the open state of the dialog.
- */
-
-/******  ac1c8d08-a01a-44f4-a3c7-9cc6cf45ea31  *******/
 export const InviteMember: React.FC<InviteMemberProps> = ({
   open,
   setOpen,
@@ -83,11 +75,12 @@ export const InviteMember: React.FC<InviteMemberProps> = ({
   const { isLoaded, organization, invitations } =
     useOrganization(OrgInvitationsParams);
   const [disabled, setDisabled] = useState(false);
+  const { toast, dismiss } = useToast();
 
   const form = useForm<z.infer<typeof inviteFormSchema>>({
     resolver: zodResolver(inviteFormSchema),
     defaultValues: {
-      email: "",
+      emails: "",
       role: "",
     },
   });
@@ -98,40 +91,73 @@ export const InviteMember: React.FC<InviteMemberProps> = ({
 
   const onSubmit = async (values: z.infer<typeof inviteFormSchema>) => {
     setDisabled(true);
-    try {
-      await organization.inviteMember({
-        emailAddress: values.email,
-        role: values.role as OrganizationCustomRoleKey,
+    const emailList = values.emails
+      .split(/[,\s]+/)
+      .filter((email) => email.trim() !== "");
+
+    const results = await Promise.allSettled(
+      emailList.map((email) =>
+        organization.inviteMember({
+          emailAddress: email.trim(),
+          role: values.role as OrganizationCustomRoleKey,
+        })
+      )
+    );
+
+    const successfulInvites = results.filter(
+      (result) => result.status === "fulfilled"
+    );
+    const failedInvites = results.filter(
+      (result) => result.status === "rejected"
+    );
+
+    await invitations?.revalidate?.();
+    form.reset();
+
+    if (successfulInvites.length > 0) {
+      toast({
+        title: "Invitations sent",
+        description: `Successfully sent invitations to ${successfulInvites.length} email(s).`,
       });
-      await invitations?.revalidate;
-      form.reset();
-    } catch (error) {
-      console.error("Error inviting member:", error);
-      // Handle error (e.g., show error message to user)
-    } finally {
-      setDisabled(false);
     }
+
+    if (failedInvites.length > 0) {
+      const failedEmails = failedInvites.map((_, index) => emailList[index]);
+      toast({
+        title: "Some invitations failed",
+        description: `Failed to send invitations to: ${failedEmails.join(", ")}`,
+        variant: "destructive",
+        action: (
+          <Button onClick={() => dismiss()}>
+            <X className="w-4 h-4" />
+          </Button>
+        ),
+      });
+    }
+
+    setOpen(false);
+    setDisabled(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Invite a New Member</DialogTitle>
+          <DialogTitle>Invite New Members</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="email"
+              name="emails"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email address</FormLabel>
+                  <FormLabel>Email addresses</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      type="email"
-                      placeholder="Enter email address"
+                      type="text"
+                      placeholder="Enter email addresses (comma or space separated)"
                     />
                   </FormControl>
                   <FormMessage />
@@ -151,13 +177,8 @@ export const InviteMember: React.FC<InviteMemberProps> = ({
                 </FormItem>
               )}
             />
-            <Button
-              type="submit"
-              disabled={disabled}
-              className="w-full"
-              onClick={() => setOpen(false)}
-            >
-              Invite Member
+            <Button type="submit" disabled={disabled} className="w-full">
+              {disabled ? "Sending Invitations..." : "Invite Members"}
             </Button>
           </form>
         </Form>
