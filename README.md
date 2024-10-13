@@ -9,7 +9,7 @@ it gives you a global access over your api keys.
 - Multi-tenant architecture with encrypted key sharing
 - CLI tool for easy interaction
 - TypeScript support
-- Integration with t3-env for type-safe environment variables
+- Integration with t3-env for type-safe environment variables [see here](https://github.com/t3-oss/t3-env)
 - Works with Vercel, Railway, Netlify, and other platforms
 
 ## Quick Start
@@ -35,6 +35,10 @@ import { k } from "keyzilla";
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+## Relationships
+
+Keyzilla offers a free trial to its software as well as a paid subscription for organizations and companies so we give a portions of our revenue to all the FOSS we use in our project to support them and and also as a thanks for making the keyzilla journey easy and enjoyable.
 
 ## License
 
