@@ -189,7 +189,7 @@ export default function Organization() {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, [fetchData, organization]); // Add organization to the dependency array
 
   if (!organization) return null;
 
