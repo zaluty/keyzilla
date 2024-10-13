@@ -1,6 +1,6 @@
-# Contributing to [Project Name]
+# Contributing to Keyzilla
 
-We're excited that you're interested in contributing to [Project Name]! This project uses [Semantic Release](https://semantic-release.gitbook.io/semantic-release/) to automate version management and package releases. To ensure that your contributions are properly recognized and versioned, please follow these guidelines when making commits.
+We're excited that you're interested in contributing to Keyzilla! This project uses [Semantic Release](https://semantic-release.gitbook.io/semantic-release/) to automate version management and package releases. To ensure that your contributions are properly recognized and versioned, please follow these guidelines when making commits.
 
 ## Commit Message Format
 
@@ -26,3 +26,12 @@ The commit type must be one of the following:
 If a commit introduces a breaking change, it should be indicated in the footer with a `BREAKING CHANGE:` prefix, or by appending a `!` after the type/scope. This will result in a `MAJOR` version increment.
 
 ### Examples
+
+- `feat`: `feat(user-profile): add the ability to upload avatars`
+- `fix`: `fix(login): resolve issue where session expires prematurely`
+- `docs`: `docs(readme): update installation instructions`
+- `style`: `style(css): fix indentation in the main stylesheet`
+- `refactor`: `refactor(authentication): streamline token generation`
+- `perf`: `perf(database): enhance query performance with indexes`
+- `test`: `test(api): add tests for user authentication routes`
+- `chore`: `chore(deps): update project dependencies`
