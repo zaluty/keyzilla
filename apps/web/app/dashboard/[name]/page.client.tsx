@@ -37,7 +37,6 @@ import EditApiKey from "@/components/dashboard/edit-api-key";
 import { format } from "date-fns";
 import ImportantNotice from "@/components/dashboard/important-notice";
 import Link from "next/link";
-import { ContactForm } from "@/components/contact";
 import { useUser } from "@clerk/nextjs";
 import { z } from "zod";
 import {
@@ -49,7 +48,6 @@ import {
 } from "@/components/ui/drawer";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import Users from "@/components/dashboard/project/users";
-export const dynamic = "force-dynamic";
 
 export default function ProjectPage({ params }: { params: { name: string } }) {
   const { organization } = useOrganization();
