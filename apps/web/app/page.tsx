@@ -12,21 +12,19 @@ import {
   SignUpButton,
   UserButton,
 } from "@clerk/nextjs";
-import BentoGrid from "@/components/bentogrid";
+import { BentoGrid } from "@/components/bentogrid";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Unauthenticated, useConvexAuth } from "convex/react";
 import PricingTable from "@/components/pricing";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { NumberTicker } from "@/components/ui/number-thicker";
 import { Footer } from "@/components/footer"; // Add this import
 import axios from "axios";
-import { TextHoverEffect } from "@/components/text-hover";
+import { RainbowButton } from "@/components/ui/rainbow-button";
 
+import { RetroGrid } from "@/components/ui/retro-grid";
+import KeyzillaComparion from "@/components/comparison";
+
+// Move this function outside of the component
 async function getRepoStars(owner: string, repo: string): Promise<number> {
   try {
     const response = await fetch(
@@ -44,111 +42,94 @@ async function getRepoStars(owner: string, repo: string): Promise<number> {
       }
     );
     const data = await response.json();
-    console.log(data);
     return data.stargazers_count;
   } catch (error) {
     console.error("Error fetching repository information:", error);
-    return -1;
+    return 0;
   }
 }
 
-// Usage
-getRepoStars("zaluty", "keyzilla").then((stars) => {
-  if (stars !== -1) {
-    console.log(`The 'keyzilla' repository by zaluty has ${stars} stars.`);
-  } else {
-    console.log("Failed to fetch repository information.");
-  }
-});
-
 export default function Home() {
-  const r = useRouter();
+  const router = useRouter();
   const [stars, setStars] = useState(0);
 
   useEffect(() => {
-    getRepoStars("zaluty", "keyzilla").then((stars) => {
-      setStars(stars);
-    });
+    getRepoStars("zaluty", "keyzilla").then(setStars);
   }, []);
-
-  function Herovideo() {
-    return (
-      <section className="max-w-5xl mx-auto h-screen flex flex-col justify-center items-center px-7 lg:px-0 relative">
-        <div className="relative rounded-2xl p-1 overflow-hidden">
-          <HeroVideoDialog
-            animationStyle="top-in-bottom-out"
-            videoSrc="https://www.youtube.com/embed/qh3NGpYRG3I?si=4rb-zSdDkVK9qxxb"
-            thumbnailSrc="https://startup-template-sage.vercel.app/hero-dark.png"
-            thumbnailAlt="Hero Video"
-          />
-        </div>
-      </section>
-    );
-  }
 
   return (
     <>
-      <div className="relative z-10">
-        <header className="flex justify-between items-center p-4">
-          <div className="logo text-xl font-bold">Keyzilla</div>
-          <nav className="flex items-center space-x-4">
-            <Button asChild>
-              <Link href="/docs" about="docs">
-                Docs
-              </Link>
-            </Button>
-            <Button>{stars}</Button>
-            <SignedOut>
-              <SignInButton
-                mode="modal"
-                signUpForceRedirectUrl="/dashboard"
-                fallbackRedirectUrl="/dashboard"
-                signUpFallbackRedirectUrl="/dashboard"
-              >
-                <Button className="bg-gradient-to-br from-indigo-700 via-accent-foreground to-fuchsia-500">
-                  Sign In
-                </Button>
-              </SignInButton>
-              <SignUpButton
-                signInFallbackRedirectUrl="/dashboard"
-                mode="modal"
-                fallbackRedirectUrl="/dashboard"
-              >
-                <Button className="bg-gradient-to-br from-indigo-700 via-accent-foreground to-fuchsia-500">
-                  Sign Up
-                </Button>
-              </SignUpButton>
-            </SignedOut>
-            <SignedIn>
-              <Button asChild>
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
-              <UserButton />
-            </SignedIn>
+      <div className="relative z-10 bg-background dark:bg-background">
+        <Header stars={stars} />
+        <div className="relative flex h-[500px] w-full flex-col items-center justify-center overflow-hidden      ">
+          <span className="pointer-events-none z-10 whitespace-pre-wrap bg-gradient-to-b from-[#ffd319] via-[#ff2975] to-[#8c1eff] bg-clip-text text-center text-7xl font-bold leading-none tracking-tighter text-transparent">
+            Keyzilla is a simple and secure way to manage your API keys
+          </span>
 
-            <ModeToggle />
-          </nav>
-        </header>
-        <div className="text-sm sm:text-3xl flex flex-col items-center justify-center mt-20 relative">
-          <TextHoverEffect text="Hello" />
-          <h1 className="text-xs sm:text-sm mb-4">
-            Built on top of{" "}
-            <Link
-              className='text-blue-500 after:content-["↗"]  '
-              href="https://env.t3.gg"
-            >
-              T3 Env
-            </Link>
-            ,
-          </h1>
-          <Button>see Demo</Button>
+          <RetroGrid angle={65} />
         </div>
-        <Hero />
+        <MainContent />
         <BentoGrid />
+        <div className="mt-5">
+          <p className="text-foreground dark:text-foreground font-semibold mb-14  text-3xl  text-center mt-14">
+            Keyzilla in Action
+          </p>
+          <KeyzillaComparion />
+        </div>
 
         <WhatGif />
+
+        <Footer />
       </div>
-      <Footer />
+    </>
+  );
+}
+
+function Header({ stars }: { stars: number }) {
+  return (
+    <header className="flex justify-between items-center p-4">
+      <div className="logo text-xl font-bold">Keyzilla</div>
+      <nav className="flex items-center space-x-4">
+        <NumberTicker value={stars}>
+          <span className="text-sm text-muted-foreground">
+            {stars > 1 ? "stars" : "star"}
+          </span>
+        </NumberTicker>
+        <AuthButtons />
+        <ModeToggle />
+      </nav>
+    </header>
+  );
+}
+
+function AuthButtons() {
+  return (
+    <>
+      <SignedOut>
+        <SignInButton mode="modal">
+          <RainbowButton>Sign In</RainbowButton>
+        </SignInButton>
+        <SignUpButton mode="modal">
+          <RainbowButton>Sign Up</RainbowButton>
+        </SignUpButton>
+      </SignedOut>
+      <SignedIn>
+        <RainbowButton>
+          <Link href="/dashboard">Dashboard</Link>
+        </RainbowButton>
+        <UserButton />
+      </SignedIn>
+    </>
+  );
+}
+
+function MainContent() {
+  return (
+    <>
+      <Hero />
+      <p className="text-foreground dark:text-foreground font-semibold  text-3xl  text-center  mt-14 mb-10">
+        Easy to set-up
+      </p>
     </>
   );
 }
@@ -168,67 +149,18 @@ function Hero() {
   );
 }
 
-function FLickeringBg() {
-  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
-
-  useEffect(() => {
-    // This effect runs only on the client side
-    function handleResize() {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    }
-
-    // Set initial size
-    handleResize();
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Don't render anything if width is 0 (initial server-side render)
-  if (windowSize.width === 0) return null;
-
-  return (
-    <div className="absolute inset-0 w-full h-full bg-background overflow-hidden">
-      <FlickeringGrid
-        className="w-full h-full"
-        squareSize={4}
-        gridGap={6}
-        color="#6B7280"
-        maxOpacity={0.5}
-        flickerChance={0.1}
-        key={`${windowSize.width}-${windowSize.height}`}
-      />
-    </div>
-  );
-}
-
 function WhatGif() {
   return (
     <div className="text-center">
-      <p className="text-foreground dark:text-foreground font-semibold mb-1 text-base sm:text-lg">
+      <p className="text-foreground dark:text-foreground font-semibold mb-1 text-3xl   mt-14">
         Pricing
-      </p>
-      <p className="text-foreground dark:text-foreground font-semibold mb-1 text-sm sm:text-base">
-        Working with api keys,{" "}
-        <span className="text-sm text-muted-foreground">
-          {" "}
-          (the most precious lines a dev could ever write){" "}
-        </span>
-        is too much for us to handle, so we use{" "}
-        <Link href={"https://convex.dev"} target="_blank">
-          Convex
-        </Link>
-        their solutions made the developement of keyzilla easier
       </p>
       <Image
         src="/giphy.webp"
         alt="What"
         width={500}
         height={500}
-        className="mx-auto mb-8"
+        className="mt-3 mx-auto rounded-2xl mb-8"
         unoptimized={true}
       />
 
