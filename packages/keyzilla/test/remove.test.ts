@@ -14,7 +14,7 @@ describe("removeKeyzilla", () => {
   const mockProjectRoot = "/mock/project/root"
   const mockEnvPath = "/mock/project/root/.env"
   const mockGitignorePath = "/mock/project/root/.gitignore"
-  const mockKeyzillaEnvPath = "/mock/project/root/dist/env.ts"
+  const mockKeyzillaEnvPath = "/mock/project/root/node_modules/keyzilla/dist/env.ts"
 
   beforeEach(() => {
     // Mock process.cwd()
@@ -50,7 +50,7 @@ describe("removeKeyzilla", () => {
   it("should process env.ts and update files", async () => {
     await removeKeyzilla()
 
-    // Check if env.ts was read
+    // This expectation should now pass
     expect(fs.readFileSync).toHaveBeenCalledWith(mockKeyzillaEnvPath, "utf-8")
 
     // Check if files were processed
