@@ -2,7 +2,6 @@
 import fs from 'fs';
 import path from 'path';
 import { glob } from 'glob';
-import dotenv from 'dotenv';
 
 export async function removeKeyzilla() {
   const projectRoot = process.cwd();
