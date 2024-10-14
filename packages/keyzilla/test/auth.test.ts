@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
 import fetch from 'node-fetch';
-import { text, password, isCancel, cancel } from '@clack/prompts';
+import { text, password, isCancel, cancel, select } from '@clack/prompts';
 import { UserData } from '../src/types/UserData';
 import { ErrorResponse } from '../src/types/error';
 import { authenticate } from '../src/auth';
@@ -11,6 +11,10 @@ import {
   clearAuthCache,
 } from '../src/auth/lib/authCache';
 import { handleCancellation } from '../src/helpers/cancel';
+import { getProjectConfig, getProjectType, getProjectName, promptProjectType, promptProjectSelection } from '../src/projects';
+import * as fs from 'fs';
+import * as path from 'path';
+import { Project } from '../src/types/project';
 
 vi.mock('node-fetch');
 vi.mock('prompts');
@@ -22,6 +26,7 @@ vi.mock('@clack/prompts', async () => {
     password: vi.fn(),
     isCancel: vi.fn(),
     cancel: vi.fn(),
+    select: vi.fn(),
   };
 });
 
@@ -212,6 +217,7 @@ describe('fetchProjects', () => {
   it('should use cached authentication for fetchProjects', async () => {
     const cachedUserData: UserData = {
       authenticated: true,
+      
       userId: 'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
       organizations: [],
       email: 'hamzaredone6@gmail.com',
@@ -246,5 +252,71 @@ describe('fetchProjects', () => {
     expect(result).toEqual(mockProjects);
     expect(mockText).not.toHaveBeenCalled();
     expect(mockPassword).not.toHaveBeenCalled();
+  });
+});
+
+describe("Automatic project configuration in production", () => {
+  beforeEach(() => {
+    process.env.NODE_ENV = "production";
+    process.env.PROJECT_NAME = "testProject";
+    process.env.ENV_TYPE = "org";
+    
+    vi.mock('fs');
+    vi.mock('path');
+    (fs.existsSync as Mock).mockReturnValue(true);
+    (path.resolve as Mock).mockReturnValue('/fake/path/.env');
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+    delete process.env.NODE_ENV;
+    delete process.env.PROJECT_NAME;
+    delete process.env.ENV_TYPE;
+  });
+
+  it("should get the project config automatically if the env is production", () => {
+    const result = getProjectConfig();
+    expect(result).toEqual({ projectName: 'testProject', envType: 'org' });
+  });
+
+  it("should get the project type automatically in production", () => {
+    const result = getProjectType();
+    expect(result).toBe('org');
+  });
+
+  it("should get the project name automatically in production", () => {
+    const result = getProjectName();
+    expect(result).toBe('testProject');
+  });
+
+  it("should return automatic project type without prompting in production", async () => {
+    const result = await promptProjectType();
+    expect(result).toBe('org');
+    expect(select).not.toHaveBeenCalled();
+  });
+
+  it("should return automatic project name without prompting in production", async () => {
+    const mockProjects = [
+      { name: 'testProject' },
+      { name: 'otherProject' }
+    ];
+    const result = await promptProjectSelection(mockProjects as unknown as Project[], 'user123');
+    expect(result).toBe('testProject');
+    expect(select).not.toHaveBeenCalled();
+  });
+
+  it("should throw an error if .env file is not found", () => {
+    (fs.existsSync as Mock).mockReturnValue(false);
+    expect(() => getProjectConfig()).toThrow('.env file not found in the project root');
+  });
+
+  it("should throw an error if PROJECT_NAME is not defined in .env", () => {
+    delete process.env.PROJECT_NAME;
+    expect(() => getProjectConfig()).toThrow('PROJECT_NAME and ENV_TYPE must be defined in the .env file');
+  });
+
+  it("should throw an error if ENV_TYPE is not 'org' or 'personal'", () => {
+    process.env.ENV_TYPE = 'invalid';
+    expect(() => getProjectConfig()).toThrow('ENV_TYPE must be either "org" or "personal"');
   });
 });

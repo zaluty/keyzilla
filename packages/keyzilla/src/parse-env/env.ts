@@ -11,8 +11,9 @@ import path from 'path';
 // it is used to generate the env.ts file
 // the env.ts file is used to type the environment variables
 // ? how about we bundle the env.ts file within the keyzilla dist file and then edit it with the api keys?
-
 const parseEnv = (apiKeys: ApiKey[]) => {
+  const isProd = process.env.NODE_ENV === 'production';
+
   const envConfig = {
     client: Object.fromEntries(
       apiKeys
@@ -30,7 +31,7 @@ const parseEnv = (apiKeys: ApiKey[]) => {
     runtimeEnv: Object.fromEntries(
       apiKeys.map(key => {
         const envKey = key.isServer ? key.name : (key.name.startsWith('NEXT_PUBLIC_') ? key.name : `NEXT_PUBLIC_${key.name}`);
-        return [envKey, key.apiKey];
+        return [envKey, isProd ? process.env[envKey] || '' : key.apiKey];
       })
     ),
   };
@@ -40,7 +41,9 @@ const parseEnv = (apiKeys: ApiKey[]) => {
 import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
-export const env = createEnv({
+const isProd = process.env.NODE_ENV === 'production';
+
+const k = createEnv({
   client: {
 ${Object.entries(envConfig.client)
   .map(([key]) => `    ${JSON.stringify(key)}: z.string().min(1),`)
@@ -51,17 +54,24 @@ ${Object.entries(envConfig.server)
   .map(([key]) => `    ${JSON.stringify(key)}: z.string().min(1),`)
   .join('\n')}
   },
-  runtimeEnv: ${JSON.stringify(envConfig.runtimeEnv, null, 2)},
+  runtimeEnv: isProd
+    ? {
+${apiKeys.map(key => {
+  const envKey = key.isServer ? key.name : (key.name.startsWith('NEXT_PUBLIC_') ? key.name : `NEXT_PUBLIC_${key.name}`);
+  return `        ${envKey}: process.env.${envKey} ?? '',`;
+}).join('\n')}
+      }
+    : ${JSON.stringify(envConfig.runtimeEnv, null, 2)},
 });
 
-export const k = env;
+export { k };
   `.trim();
-  
   let packagePath;
   try {
     packagePath = path.resolve(__dirname, '..', '..');
   } catch (error) {
     console.error('Error finding package path:', error);
+
     return null;
   }
 
@@ -80,3 +90,5 @@ export const k = env;
 };
 
 export { parseEnv };
+
+ 
