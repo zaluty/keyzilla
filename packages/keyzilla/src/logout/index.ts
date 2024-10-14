@@ -19,9 +19,9 @@ async function logout() {
   }
   if (shouldLogout) {
     clearAuthData();
-    console.log("You have been successfully logged out.");
+    console.log("✅ You have been successfully logged out.");
   } else {
-    console.log("Logout cancelled.");
+    console.log("❌ Logout cancelled.");
   }
 }
 

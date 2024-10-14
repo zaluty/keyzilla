@@ -9,12 +9,12 @@ export function deleteTempFiles(): void {
 function deleteFile(filePath: string): void {
   try {
     fs.unlinkSync(filePath);
-    console.log(`Successfully deleted ${filePath}`);
+    console.log(`✅ Successfully deleted authentication cache`);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      console.log(`File not found: ${filePath}`);
+      console.log(`❌ You are already logged out.`);
     } else {
-      console.error(`Error deleting ${filePath}:`, error);
+      console.error(`❌ Error deleting ${filePath}:`, error);
     }
   }
 }

@@ -12,13 +12,17 @@ import { handleCancellation } from "../helpers/cancel";
 import { ErrorResponse } from "../types/error";
 import { Organization } from "../types/org";
 
-console.log("Starting authentication process..."); 
 
 
 // this is the main function that handles the authentication process
 // we first check if the user is authenticated by checking the cache 
 // so we won't have to repeat the login 1process
-// if the user 
+// if the user  is not authenticated we prompt them for their email and secret code
+// we then fetch the user data from the server
+// we then verify the user data
+// we then save the user data to the cache
+// we then return the user data
+// if any of the steps fail, we clear the cache and return null
 export async function authenticate(): Promise<UserData | null> {
   const cachedAuth = await checkAuthentication();
   if (cachedAuth) {

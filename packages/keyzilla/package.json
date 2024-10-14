@@ -1,6 +1,6 @@
 {
   "name": "keyzilla",
-  "version": "0.0.16",
+  "version": "1.6.1-dev",
   "description": "gain a global access over your api keys ",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -10,7 +10,7 @@
     "./extend": "./dist/extend.js"
   },
   "bin": {
-    "keyzilla": "./dist/projects/main.js"
+    "keyzilla": "./dist/cli.js"
   },
   "scripts": {
     "prettier": "prettier --write",

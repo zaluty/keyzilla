@@ -2,6 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import { glob } from 'glob';
+import dotenv from 'dotenv';
 
 export async function removeKeyzilla() {
   const projectRoot = process.cwd();
@@ -15,7 +16,7 @@ export async function removeKeyzilla() {
     const keyzillaPath = path.join(nodeModulesPath, 'keyzilla');
     const keyzillaDistPath = path.join(keyzillaPath, 'dist');
     keyzillaEnvPath = path.join(keyzillaDistPath, 'env.ts');
-    
+    console.log(keyzillaEnvPath)
     if (!fs.existsSync(keyzillaEnvPath)) {
       throw new Error('env.ts not found in keyzilla package dist folder');
     }
@@ -24,22 +25,45 @@ export async function removeKeyzilla() {
     return;
   }
 
-  // Step 2: Read and parse the env.ts file to get API keys
-  let apiKeys: Set<string>;
+  // Step 2: Read and parse the env.ts file to get API keys and their values
+  let apiKeys: Map<string, string>;
   try {
     const envContent = fs.readFileSync(keyzillaEnvPath, 'utf-8');
-    const keyMatch = envContent.match(/Object\.keys\((\w+)\)/);
-    if (!keyMatch) {
+    const clientMatch = envContent.match(/client:\s*{([^}]+)}/);
+    const serverMatch = envContent.match(/server:\s*{([^}]+)}/);
+    const runtimeEnvMatch = envContent.match(/runtimeEnv:\s*{([^}]+)}/);
+    
+    if (!clientMatch && !serverMatch) {
       throw new Error('Unable to find API keys in env.ts');
     }
-    const keysVarName = keyMatch[1];
-    const keysMatch = envContent.match(new RegExp(`${keysVarName}\\s*=\\s*({[^}]+})`));
-    if (!keysMatch) {
-      throw new Error('Unable to parse API keys from env.ts');
+
+    apiKeys = new Map();
+    
+    const parseSection = (section: string) => {
+      const keyValuePairs = section.match(/"([^"]+)":\s*([^,\n]+)/g);
+      keyValuePairs?.forEach(pair => {
+        const [key, value] = pair.split(':').map(part => part.trim().replace(/['"]/g, ''));
+        apiKeys.set(key, value);
+      });
+    };
+
+    if (clientMatch) parseSection(clientMatch[1]);
+    if (serverMatch) parseSection(serverMatch[1]);
+    
+    // Parse runtimeEnv to get actual values
+    if (runtimeEnvMatch) {
+      const runtimeEnvPairs = runtimeEnvMatch[1].match(/"([^"]+)":\s*([^,\n]+)/g);
+      runtimeEnvPairs?.forEach(pair => {
+        const [key, value] = pair.split(':').map(part => part.trim().replace(/['"]/g, ''));
+        if (apiKeys.has(key)) {
+          apiKeys.set(key, value);
+        }
+      });
     }
-    // Replace eval with JSON.parse
-    const keysObj = JSON.parse(keysMatch[1].replace(/'/g, '"'));
-    apiKeys = new Set(Object.keys(keysObj));
+
+    if (apiKeys.size === 0) {
+      throw new Error('No API keys found in env.ts');
+    }
   } catch (error) {
     console.error('Error parsing env.ts:', error);
     return;
@@ -53,7 +77,7 @@ export async function removeKeyzilla() {
     const filePath = path.join(projectRoot, file);
     let content = fs.readFileSync(filePath, 'utf-8');
     
-    for (const apiKey of apiKeys) {
+    for (const [apiKey] of apiKeys) {
       const regex = new RegExp(`k\\.${apiKey}`, 'g');
       content = content.replace(regex, `process.env.${apiKey}`);
     }
@@ -61,8 +85,10 @@ export async function removeKeyzilla() {
     fs.writeFileSync(filePath, content);
   }
 
-  // Step 5: Create .env file with API keys
-  const envContent = Array.from(apiKeys).map(key => `${key}=`).join('\n');
+  // Step 5: Create .env file with API keys and their values
+  const envContent = Array.from(apiKeys)
+    .map(([key, value]) => `${key}=${value}`)
+    .join('\n');
   fs.writeFileSync(envFilePath, envContent);
 
   // Step 6: Add .env to .gitignore if not already present
@@ -74,6 +100,13 @@ export async function removeKeyzilla() {
   
   console.log('Keyzilla removal process completed:');
   console.log('1. Replaced all process.env.APIKEY_NAME occurrences with process.env.APIKEY_NAME');
-  console.log('2. Created .env file with empty API key values');
+  console.log('2. Created .env file with API keys and their values');
   console.log('3. Added .env to .gitignore (if not already present)');
 }
+
+
+removeKeyzilla().then(() => {
+  console.log('Keyzilla removal process completed');
+}).catch((error) => {
+  console.error('Error removing Keyzilla:', error);
+});

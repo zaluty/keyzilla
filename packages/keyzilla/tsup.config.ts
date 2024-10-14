@@ -27,5 +27,4 @@ node-domexception/index.js:
   (*! node-domexception. MIT License. Jimmy Wärting <https://jimmy.warting.se/opensource> *)
 */`,
   },
-  external: ['src/env/**'],
 });

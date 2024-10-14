@@ -2,7 +2,6 @@
 
 import { execSync } from 'child_process';
 import path from 'path';
-
 // This is the entry point for the cli 
 // ? why is this needed when we  can use the npm bin in the package.json?
 // ? we had to use this file because of some err encountered during the development
@@ -13,18 +12,17 @@ const command = process.argv[2];
 // ? we are using the `__dirname` to resolve the path to the dist folder
 // ? this is done to ensure that the path is correct no matter where the user is running the command from
 const basePath: string = path.resolve(__dirname, '../../../node_modules/keyzilla/dist');
-
 // we switch the command and execute the corresponding file 
 // ? why is this done this way?
-// ? we are using the `execSync` to execute the command
+// ? we are using the `execSync` to execute the command 
 // ? this is done to ensure that the command is executed in the same process
+
 switch (command) {
   case 'login':
     execSync(`node ${path.join(basePath, 'auth/index.js')}`, { stdio: 'inherit' });
     break;
   case 'logout':
     execSync(`node ${path.join(basePath, 'logout/index.js')}`, { stdio: 'inherit' });
-    console.log("logged out successfully", basePath);
     break;
   case 'pull':
     execSync(`node ${path.join(basePath, 'projects/main.js')}`, { stdio: 'inherit' });
