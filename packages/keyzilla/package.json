@@ -41,7 +41,8 @@
     "node-fetch": "^3.3.2",
     "vitest": "^2.1.0",
     "whatwg-fetch": "^3.6.20",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "dotenv": "^16.4.5"
   },
   "peerDependencies": {
     "@t3-oss/env-nextjs": "^0.11.1"
