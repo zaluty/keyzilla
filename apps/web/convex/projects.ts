@@ -291,8 +291,27 @@ export const updateProjectAllowedUsers = mutation({
 export const getProjectUsers = query({
     args: { projectId: v.id("projects") },
     handler: async (ctx, args) => {
+        const identity = await ctx.auth.getUserIdentity();
+        if (identity === null) {
+            throw new ConvexError("Not authenticated");
+        }
+   // basic checks 
+        if(identity.orgId){
+            return null;
+       }
         const project = await ctx.db.get(args.projectId);
-        return project?.allowedUsers;
-    }
+        if (!project) {
+            return null; // Project not found
+        }
+         
+        // Check if the user has access to this project
+        if (!project.allowedUsers?.includes(identity.subject) ) {
+            throw new ConvexError("Not authorized to view this project's users");
+        }
 
-})
+        return project.allowedUsers || [identity.subject];
+    }
+});
+
+ 
+

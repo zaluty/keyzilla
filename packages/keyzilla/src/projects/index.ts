@@ -8,6 +8,10 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
+
+process.env.NODE_ENV = 'production';
+
+
 // this function fetches the projects from the server
 // it takes the project type, the user id and the organization id as arguments
 // and returns an array of projects
@@ -45,27 +49,31 @@ export async function fetchProjects(
 }
 
 /**
- * This function reads the project configuration from the .env file
+ * This function reads the project configuration from the keyzilla.config.ts file
  * @returns An object containing the project name and environment type
  */
 export function getProjectConfig(): { projectName: string, envType: "org" | "personal" } {
-  const envPath = path.resolve(process.cwd(), '.env');
+  const configPath = path.resolve(process.cwd(), 'keyzilla.config.ts');
   
-  if (!fs.existsSync(envPath)) {
-    throw new Error('.env file not found in the project root');
+  if (!fs.existsSync(configPath)) {
+    throw new Error('keyzilla.config.ts file not found in the project root');
   }
 
-  dotenv.config({ path: envPath });
+  const configContent = fs.readFileSync(configPath, 'utf8');
 
-  const projectName = process.env.PROJECT_NAME;
-  const envType = process.env.ENV_TYPE as "org" | "personal";
+  // Extract projectName and envType using regex
+  const projectNameMatch = configContent.match(/projectName:\s*["'](.+?)["']/);
+  const envTypeMatch = configContent.match(/envType:\s*["'](.+?)["']/);
 
-  if (!projectName || !envType) {
-    throw new Error('PROJECT_NAME and ENV_TYPE must be defined in the .env file');
+  if (!projectNameMatch || !envTypeMatch) {
+    throw new Error('projectName and envType must be defined in the keyzilla.config.ts file');
   }
+
+  const projectName = projectNameMatch[1];
+  const envType = envTypeMatch[1] as "org" | "personal";
 
   if (envType !== "org" && envType !== "personal") {
-    throw new Error('ENV_TYPE must be either "org" or "personal"');
+    throw new Error('envType must be either "org" or "personal"');
   }
 
   return { projectName, envType };
