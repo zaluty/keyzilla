@@ -33,6 +33,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { OrgSwitcher } from "../Org-switcher";
 
 export default function Users({ projectId }: { projectId: Id<"projects"> }) {
   const { user, isLoaded: isUserLoaded } = useUser();
@@ -48,31 +51,11 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const [selectedUsers, setSelectedUsers] = useState<string[]>(users || []);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
   const filteredMemberships = useMemo(() => {
     return memberships?.data || [];
   }, [memberships?.data]);
-
-  const handleUserToggle = async (userId: string) => {
-    const updatedUsers = selectedUsers.includes(userId)
-      ? selectedUsers.filter((id) => id !== userId)
-      : [...selectedUsers, userId];
-    setSelectedUsers(updatedUsers);
-
-    try {
-      await updateProject({ projectId, allowedUsers: updatedUsers });
-      toast({
-        title: "User access updated successfully",
-      });
-    } catch (error) {
-      console.error("Error updating user access:", error);
-      toast({
-        variant: "destructive",
-        title: "Failed to update user access. Please try again.",
-      });
-    }
-  };
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -100,12 +83,36 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
       fetchUsers();
     }
   }, [projectId, users, isUserLoaded]);
+
   const scrollAreaHeight = useMemo(() => {
     const userCount = memberships?.data?.length || 0;
     const baseHeight = 50; // Height of a single user item
     const maxHeight = 300; // Maximum height of the scroll area
     return Math.min(userCount * baseHeight, maxHeight);
   }, [memberships?.data?.length]);
+
+  if (!memberships) return <NotInOrg />;
+
+  const handleUserToggle = async (userId: string) => {
+    const updatedUsers = selectedUsers.includes(userId)
+      ? selectedUsers.filter((id) => id !== userId)
+      : [...selectedUsers, userId];
+    setSelectedUsers(updatedUsers);
+
+    try {
+      await updateProject({ projectId, allowedUsers: updatedUsers });
+      toast({
+        title: "User access updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating user access:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to update user access. Please try again.",
+      });
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -222,5 +229,28 @@ function InfoIcon() {
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
+  );
+}
+
+function NotInOrg() {
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Organization Required</CardTitle>
+          <OrgSwitcher />
+        </div>
+      </CardHeader>
+      <CardContent>
+        <Alert variant="default" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Access Denied</AlertTitle>
+          <AlertDescription>
+            You are not in an organization. Please join or create an
+            organization to manage users.
+          </AlertDescription>
+        </Alert>
+      </CardContent>
+    </Card>
   );
 }

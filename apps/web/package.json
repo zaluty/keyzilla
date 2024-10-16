@@ -2,6 +2,7 @@
   "name": "keyzilla-web",
   "version": "0.1.0",
   "private": true,
+  "description": "Keyzilla Web",
   "scripts": {
     "dev": "next dev ",
     "build": "next build",

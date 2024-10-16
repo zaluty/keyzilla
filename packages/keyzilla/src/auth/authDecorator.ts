@@ -19,7 +19,11 @@ export function requireAuth<T extends (...args: any[]) => Promise<any>>(
   return async (...args: Parameters<T>): Promise<ReturnType<T>> => {
     let userData = await checkAuthentication();
     if (!userData) {
-      userData = await authenticate();
+      if (process.env.NODE_ENV === "production") {
+        userData = await authenticate(true);
+      } else {
+        userData = await authenticate(false);
+      }
       if (!userData) {
         throw new Error("Authentication required");
       }

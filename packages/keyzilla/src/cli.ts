@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 import { execSync } from 'child_process';
 import path from 'path';
 // This is the entry point for the cli 
@@ -30,7 +29,13 @@ switch (command) {
   case 'remove':
     execSync(`node ${path.join(basePath, 'remove/index.js')}`, { stdio: 'inherit' });
     break;
+  case 'prod':
+    execSync(`node ${path.join(basePath, 'production/index.js')}`, { stdio: 'inherit' });
+    break;
   default:
-    console.log(`Unknown command: ${command} \n\n here is a list of commands: \n\n login: to login to the keyzilla platform \n\n logout: to logout from the keyzilla platform \n\n pull: to pull the projects from the keyzilla platform \n\n remove: to remove the project from your codebase\n\n`);
+    console.log(`Unknown command: ${command} \n\n here is a list of commands: \n\n login: to login to the keyzilla platform \n\n logout: to logout from the keyzilla platform \n\n pull: to pull the projects from the keyzilla platform \n\n remove: to remove the project from your codebase\n\n prod: to use the keyzilla in production mode\n\n`);
     process.exit(1);
 }
+
+
+ 

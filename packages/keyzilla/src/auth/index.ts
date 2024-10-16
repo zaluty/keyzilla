@@ -11,8 +11,49 @@ import { BASE_URL } from "../constants/urls";
 import { handleCancellation } from "../helpers/cancel";
 import { ErrorResponse } from "../types/error";
 import { Organization } from "../types/org";
+import { getProjectConfig } from "../projects";
+import * as fs from 'fs';
+import * as path from 'path';
+import { KeyzillaConfig } from "../types/config";
 
 
+process.env.NODE_ENV = 'production';
+// Add this function to read and parse the config file
+function readConfigFile(): KeyzillaConfig {
+  const configPath = path.resolve(process.cwd(), 'keyzilla.config.ts');
+  const configContent = fs.readFileSync(configPath, 'utf8');
+  
+  // Extract the config object from the file content
+  const configMatch = configContent.match(/export\s+const\s+config\s*=\s*KeyzillaConfig\s*\(([\s\S]*?)\);/);
+  
+  if (configMatch && configMatch[1]) {
+    let configString = configMatch[1].trim();
+    
+    // Remove non-null assertion operators
+    configString = configString.replace(/!/g, '');
+    
+    // Replace process.env with a mock object 
+    // for ex
+    configString = configString.replace(/process\.env/g, '({})');
+    
+    try {
+      // Use Function constructor to safely evaluate the config object
+      const configObj = new Function(`return (${configString})`)();
+      
+      // Check if the resulting object has the expected structure
+      if (typeof configObj === 'object' && configObj !== null && 'credentials' in configObj) {
+        return configObj as KeyzillaConfig;
+      } else {
+        throw new Error('Invalid config structure');
+      }
+    } catch (error) {
+      console.error('Error parsing config:', error);
+      throw new Error('Unable to parse keyzilla.config.ts');
+    }
+  } else {
+    throw new Error('Unable to find config in keyzilla.config.ts' + configPath);
+  }
+}
 
 // this is the main function that handles the authentication process
 // we first check if the user is authenticated by checking the cache 
@@ -23,14 +64,24 @@ import { Organization } from "../types/org";
 // we then save the user data to the cache
 // we then return the user data
 // if any of the steps fail, we clear the cache and return null
-export async function authenticate(): Promise<UserData | null> {
+export async function authenticate(production: boolean): Promise<UserData | null> {
   const cachedAuth = await checkAuthentication();
   if (cachedAuth) {
     console.log("✅ Using cached authentication");  
     return cachedAuth;
   }
+  let credentials;
 
-  const credentials = await promptCredentials();
+  if (production) {
+    const config = readConfigFile();
+    credentials = { 
+      email: config.credentials.email, 
+      secretCode: config.credentials.secretCode 
+    };
+  } else {
+    credentials = await promptCredentials();
+  }
+
   if (!credentials) {
     console.log("Authentication cancelled.");
     return null;
@@ -130,7 +181,7 @@ async function verifyUser(
   secretCode: string,
   organizations: Organization[]
 ): Promise<UserData> {
-  console.log(`Verifying user ID: ${userId}`); // Added logging
+  console.log(`verifying user`); // Added logging from me
   const response = await fetch(`${BASE_URL}/api/verify`, {
     method: "POST",
     headers: {
@@ -144,7 +195,7 @@ async function verifyUser(
     if (isErrorResponse(errorData)) {
       throw new Error(errorData.error);
     } else {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status} `);
     }
   }
 
@@ -225,12 +276,15 @@ function isOrganization(org: unknown): org is Organization {
 }
 
 function getErrorMessage(error: unknown): string {
+  
   if (error instanceof Error) return error.message;
   return String(error);
 }
 
+ 
+
 // Start the authentication process and catch any errors if they occur
 // this is the entry point of the auth process 
-authenticate().catch((error) => {
-  console.error("Unexpected error:", error as Error);
+ authenticate(process.env.NODE_ENV === "production").catch((error) => {
+  console.error("Unexpected error:", error);
 });

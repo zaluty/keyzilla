@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
 import fetch from 'node-fetch';
-import { text, password, isCancel, cancel } from '@clack/prompts';
+import { text, password, isCancel, cancel, select } from '@clack/prompts';
 import { UserData } from '../src/types/UserData';
 import { ErrorResponse } from '../src/types/error';
 import { authenticate } from '../src/auth';
@@ -11,6 +11,12 @@ import {
   clearAuthCache,
 } from '../src/auth/lib/authCache';
 import { handleCancellation } from '../src/helpers/cancel';
+import { getProjectConfig, getProjectType, getProjectName, promptProjectType, promptProjectSelection } from '../src/projects';
+import * as fs from 'fs';
+import * as path from 'path';
+import { Project } from '../src/types/project';
+import * as dotenv from 'dotenv';
+import { Response } from 'node-fetch';
 
 vi.mock('node-fetch');
 vi.mock('prompts');
@@ -22,6 +28,7 @@ vi.mock('@clack/prompts', async () => {
     password: vi.fn(),
     isCancel: vi.fn(),
     cancel: vi.fn(),
+    select: vi.fn(),
   };
 });
 
@@ -46,6 +53,14 @@ mockCheckAuthentication.mockResolvedValue(null);
 const mockExit = vi
   .spyOn(process, 'exit')
   .mockImplementation(() => undefined as never);
+
+vi.mock('fs');
+vi.mock('path');
+
+// Mock dotenv
+vi.mock('dotenv', () => ({
+  config: vi.fn(), 
+}));
 
 describe('authenticate', () => {
   beforeEach(() => {
@@ -82,7 +97,7 @@ describe('authenticate', () => {
       json: async () => mockUserData,
     });
 
-    const result = await authenticate();
+    const result = await authenticate(false);
     console.log('Result:', result); // Add logging
     expect(result).toEqual(mockUserData);
     expect(saveAuthCache).toHaveBeenCalledWith(mockUserData);
@@ -101,7 +116,7 @@ describe('authenticate', () => {
       json: async () => mockErrorResponse,
     });
 
-    const result = await authenticate();
+    const result = await authenticate(false);
     console.log('Result:', result); // Add logging
     expect(result).toBeNull();
     expect(clearAuthCache).toHaveBeenCalled();
@@ -112,7 +127,7 @@ describe('authenticate', () => {
     mockPassword.mockImplementation(() => Promise.resolve('wrongcode'));
     mockFetch.mockRejectedValueOnce(new Error('Network error'));
 
-    const result = await authenticate();
+    const result = await authenticate(false);
 
     expect(result).toBeNull();
   });
@@ -140,7 +155,7 @@ describe('authenticate', () => {
 
     mockFetch.mockRejectedValueOnce(new Error('Verification error'));
 
-    const result = await authenticate();
+    const result = await authenticate(false);
     console.log('Result:', result); // Add logging
     expect(result).toBeNull();
   });
@@ -151,7 +166,7 @@ describe('authenticate', () => {
     mockIsCancel.mockReturnValue(true);
     mockCancel.mockImplementation(() => {});
 
-    const result = await authenticate();
+    const result = await authenticate(false);
     console.log('Result:', result);
     expect(result).toBeNull();
     expect(mockCancel).toHaveBeenCalled();
@@ -167,8 +182,8 @@ describe('authenticate', () => {
     };
     mockCheckAuthentication.mockResolvedValueOnce(cachedUserData);
 
-    const result = await authenticate();
-    expect(result).toEqual(cachedUserData);
+    const result = await authenticate(false);
+    expect(result).toEqual(cachedUserData);  
     expect(mockText).not.toHaveBeenCalled();
     expect(mockPassword).not.toHaveBeenCalled();
     expect(mockFetch).not.toHaveBeenCalled();
@@ -179,21 +194,20 @@ describe('fetchProjects', () => {
   it('should fetch projects successfully', async () => {
     const mockProjects = [
       {
-        _creationTime: 1728770426996.0417,
-        _id: 'j973ecshr15m5g12dmemjxc42172hz4f',
+        _creationTime: 1729103365772.4788,
+        _id: "j975xv3fxgzbznfhhqc2vqbz8h72sx2v",
         allowedUsers: [
-          'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
-          'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
+          "user_2lIMrqfvKXIV6zGC9jr1TY5TsAw",
+          "user_2lIMrqfvKXIV6zGC9jr1TY5TsAw",
         ],
         apiKeys: [],
-        createdAt: 1728770426996,
-        description: 'test',
-        name: 'keyzilla',
-        updatedAt: 1728770426996,
-        userId: 'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
-        userName: 'Hamza',
-        userProfile:
-          'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ2l0aHViL2ltZ18ybElNcnMzbElyS0JwM2RnS1g0bWltUEViN3gifQ',
+        createdAt: 1729103365772,
+        description: "ddd",
+        name: "keyzilla",
+        updatedAt: 1729103365772,
+        userId: "user_2lIMrqfvKXIV6zGC9jr1TY5TsAw",
+        userName: "Hamza",
+        userProfile: "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ2l0aHViL2ltZ18ybElNcnMzbElyS0JwM2RnS1g0bWltUEViN3gifQ",
       },
     ];
 
@@ -212,6 +226,7 @@ describe('fetchProjects', () => {
   it('should use cached authentication for fetchProjects', async () => {
     const cachedUserData: UserData = {
       authenticated: true,
+      
       userId: 'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
       organizations: [],
       email: 'hamzaredone6@gmail.com',
@@ -220,21 +235,20 @@ describe('fetchProjects', () => {
 
     const mockProjects = [
       {
-        _creationTime: 1728770426996.0417,
-        _id: 'j973ecshr15m5g12dmemjxc42172hz4f',
+        _creationTime: 1729103365772.4788,
+        _id: "j975xv3fxgzbznfhhqc2vqbz8h72sx2v",
         allowedUsers: [
-          'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
-          'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
+          "user_2lIMrqfvKXIV6zGC9jr1TY5TsAw",
+          "user_2lIMrqfvKXIV6zGC9jr1TY5TsAw",
         ],
         apiKeys: [],
-        createdAt: 1728770426996,
-        description: 'test',
-        name: 'keyzilla',
-        updatedAt: 1728770426996,
-        userId: 'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
-        userName: 'Hamza',
-        userProfile:
-          'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ2l0aHViL2ltZ18ybElNcnMzbElyS0JwM2RnS1g0bWltUEViN3gifQ',
+        createdAt: 1729103365772,
+        description: "ddd",
+        name: "keyzilla",
+        updatedAt: 1729103365772,
+        userId: "user_2lIMrqfvKXIV6zGC9jr1TY5TsAw",
+        userName: "Hamza",
+        userProfile: "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ2l0aHViL2ltZ18ybElNcnMzbElyS0JwM2RnS1g0bWltUEViN3gifQ",
       },
     ];
     mockFetch.mockResolvedValueOnce({
@@ -248,3 +262,99 @@ describe('fetchProjects', () => {
     expect(mockPassword).not.toHaveBeenCalled();
   });
 });
+
+describe("Automatic project configuration in production", () => {
+  beforeEach(() => {
+    vi.resetAllMocks();
+    process.env.NODE_ENV = "production";
+    
+    // Mock fs.existsSync to return true for the config file
+    (fs.existsSync as Mock).mockImplementation((filePath: string) => {
+      return filePath.endsWith('keyzilla.config.ts');
+    });
+
+    // Mock fs.readFileSync to return a mock config file content
+    (fs.readFileSync as Mock).mockImplementation(() => `
+      export const config = {
+        projectName: "testProject",
+        envType: "org"
+      };
+    `);
+
+    // Mock path.resolve to return a fake path
+    (path.resolve as Mock).mockReturnValue('/fake/path/keyzilla.config.ts');
+
+    // Clear environment variables
+    delete process.env.KEYZILLA_PROJECT_NAME;
+    delete process.env.KEYZILLA_ENV_TYPE;
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it("should get the project config automatically if the env is production", () => {
+    const result = getProjectConfig();
+    expect(result).toEqual({ projectName: 'testProject', envType: 'org' });
+  });
+
+  it("should get the project type automatically in production", () => {
+    const result = getProjectType();
+    expect(result).toBe('org');
+  });
+
+  it("should get the project name automatically in production", () => {
+    const result = getProjectName();
+    expect(result).toBe('testProject');
+  });
+
+  it("should return automatic project type without prompting in production", async () => {
+    const result = await promptProjectType();
+    expect(result).toBe('org');
+    expect(select).not.toHaveBeenCalled();
+  });
+
+  it("should return automatic project name without prompting in production", async () => {
+    const mockProjects = [
+      { name: 'testProject' },
+      { name: 'otherProject' }
+    ];
+    const result = await promptProjectSelection(mockProjects as unknown as Project[], 'user123');
+    expect(result).toBe('testProject');
+    expect(select).not.toHaveBeenCalled();
+  });
+
+  it("should throw an error if config file is not found", () => {
+    (fs.existsSync as Mock).mockReturnValue(false);
+    expect(() => getProjectConfig()).toThrow('keyzilla.config.ts file not found');
+  });
+
+  it("should throw an error if projectName is not defined in config", () => {
+    (fs.readFileSync as Mock).mockReturnValue(`
+      export const config = {
+        envType: "org"
+      };
+    `);
+    expect(() => getProjectConfig()).toThrow("projectName and envType must be defined in the keyzilla.config.ts file");
+  });
+
+  it("should throw an error if envType is not defined in config", () => {
+    (fs.readFileSync as Mock).mockReturnValue(`
+      export const config = {
+        projectName: "testProject"
+      };
+    `);
+    expect(() => getProjectConfig()).toThrow('envType must be defined in the keyzilla.config.ts file');
+  });
+
+  it("should throw an error if envType is not 'org' or 'personal'", () => {
+    (fs.readFileSync as Mock).mockReturnValue(`
+      export const config = {
+        projectName: "testProject",
+        envType: "invalid"
+      };
+    `);
+    expect(() => getProjectConfig()).toThrow('envType must be either "org" or "personal"');
+  });
+});
+ 

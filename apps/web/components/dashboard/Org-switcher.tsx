@@ -67,7 +67,7 @@ export const OrgSwitcher = () => {
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[200px] p-0 ">
+      <PopoverContent className="w-[200px] pb-3  pt-0 px-0 space-y-4">
         <ul className="max-h-[300px] overflow-auto space-y-1">
           <li
             key="personal"
@@ -138,15 +138,6 @@ export const OrgSwitcher = () => {
             Load more organizations
           </Button>
         )}
-        <Button
-          onClick={() => {
-            setCreateOrg(true);
-          }}
-          className="my-4  mx-4"
-        >
-          Create Organization
-        </Button>
-        <CreateOrganization open={createOrg} setOpen={setCreateOrg} />
       </PopoverContent>
     </Popover>
   );

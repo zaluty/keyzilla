@@ -24,7 +24,7 @@ function sleep(ms: number) {
  */
 async function main() {
   try {
-    const userData = await authenticate();
+    const userData = await authenticate(process.env.NODE_ENV === 'production');
     if (!userData) {
       console.log("Authentication failed."); 
       return;

@@ -15,14 +15,33 @@ Keyzilla is designed to work seamlessly with Vercel deployments. It automaticall
 
 ![Vercel Environment Variables](/vercel-env.png)
 
+4. Add the following environment variables to Vercel
+
+- `KEYZILLA_API_SECRET`
+- `KEYZILLA_PROJECT_NAME`
+- `KEYZILLA_ENV_TYPE`
+  {" "}
+  <Callout type="warn">
+    Make sure to add all the environment variables to Vercel, so keyzilla can
+    detect them. Don't change their names, use the same names from keyzilla
+    dashboard.
+  </Callout>
+
+5. Add the prod commanf from keyzilla dashboard to your vercel build command.
+
+![Vercel Environment Variables](/vercel-build.png)
+
+{" "}
+
+<Callout type="info">
+  Make sure to add the prod command to your vercel build command, so keyzilla
+  can detect them. before the build command or whatever you use to build your
+  project.
+</Callout>
+
 ### How Keyzilla Uses Environment Variables
 
 - In production, Keyzilla will use `process.env` for Node.js-based frameworks or `import.meta.env` for frameworks that support it.
 - You don't need to modify your code or configuration; Keyzilla handles the detection and usage automatically.
-
-### Best Practices
-
-- Make sure to add all the environment variables to Vercel, so keyzilla can detect them.
-- Don't change their names, use the same names from keyzilla dashboard.
 
 For more information on managing environment variables in Vercel, refer to the [Vercel documentation on Environment Variables](https://vercel.com/docs/concepts/projects/environment-variables).

@@ -4,6 +4,13 @@ import { Project } from "../types/project";
 import { handleCancellation } from "../helpers/cancel";
 import { getErrorMessage } from "../helpers/getError";
 import { Organization } from "../types/org";
+import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
+
+
+process.env.NODE_ENV = 'production';
+
 
 // this function fetches the projects from the server
 // it takes the project type, the user id and the organization id as arguments
@@ -42,10 +49,54 @@ export async function fetchProjects(
 }
 
 /**
+ * This function reads the project configuration from the keyzilla.config.ts file
+ * @returns An object containing the project name and environment type
+ */
+export function getProjectConfig(): { projectName: string, envType: "org" | "personal" } {
+  const configPath = path.resolve(process.cwd(), 'keyzilla.config.ts');
+  
+  if (!fs.existsSync(configPath)) {
+    throw new Error('keyzilla.config.ts file not found in the project root');
+  }
+
+  const configContent = fs.readFileSync(configPath, 'utf8');
+
+  // Extract projectName and envType using regex
+  const projectNameMatch = configContent.match(/projectName:\s*["'](.+?)["']/);
+  const envTypeMatch = configContent.match(/envType:\s*["'](.+?)["']/);
+
+  if (!projectNameMatch || !envTypeMatch) {
+    throw new Error('projectName and envType must be defined in the keyzilla.config.ts file');
+  }
+
+  const projectName = projectNameMatch[1];
+  const envType = envTypeMatch[1] as "org" | "personal";
+
+  if (envType !== "org" && envType !== "personal") {
+    throw new Error('envType must be either "org" or "personal"');
+  }
+
+  return { projectName, envType };
+}
+
+/**
+ * This function determines whether to use automatic configuration or prompt the user
+ * @returns True if automatic configuration should be used, false otherwise
+ */
+function shouldUseAutomaticConfig(): boolean {
+  return process.env.NODE_ENV === 'production';
+}
+
+/**
  * this function prompts the user to select the project type
  * it returns the project type org | personal
  */
 export async function promptProjectType(): Promise<"org" | "personal"> {
+  if (shouldUseAutomaticConfig()) {
+    const { envType } = getProjectConfig();
+    return envType;
+  }
+  
   const projectType = await select({
     message: "Select an environment?",
     options: [
@@ -74,6 +125,11 @@ export async function promptProjectSelection(
   projects: Project[],
   userId: string
 ): Promise<string> { 
+  if (shouldUseAutomaticConfig()) {
+    const { projectName } = getProjectConfig();
+    return projectName;
+  }
+  
   const selectedProject = await select({
     message: "Select a project:",
     options: projects.map((project) => ({
@@ -86,7 +142,7 @@ export async function promptProjectSelection(
     handleCancellation();
   }
 
-  return selectedProject  as string;
+  return selectedProject as string;
 }
  
 /**
@@ -105,4 +161,22 @@ export async function promptOrganizationSelection(organizations: Organization[])
     options: choices.map(choice => ({ value: choice.value, label: choice.title }))
   });
   return organizationId;
+}
+
+/**
+ * This function gets the project type automatically from the .env file
+ * @returns The project type ("org" | "personal")
+ */
+export function getProjectType(): "org" | "personal" {
+  const { envType } = getProjectConfig();
+  return envType;
+}
+
+/**
+ * This function gets the project name automatically from the .env file
+ * @returns The project name
+ */
+export function getProjectName(): string {
+  const { projectName } = getProjectConfig();
+  return projectName;
 }
