@@ -44,8 +44,6 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
       infinite: true,
     },
   });
-  if (!memberships) return <NotInOrg />;
-
   const users = useQuery(api.projects.getProjectUsers, { projectId });
   const updateProject = useMutation(api.projects.updateProjectAllowedUsers);
   const [userData, setUserData] = useState<any[]>([]);
@@ -53,31 +51,11 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const [selectedUsers, setSelectedUsers] = useState<string[]>(users || []);
+  const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
 
   const filteredMemberships = useMemo(() => {
     return memberships?.data || [];
   }, [memberships?.data]);
-
-  const handleUserToggle = async (userId: string) => {
-    const updatedUsers = selectedUsers.includes(userId)
-      ? selectedUsers.filter((id) => id !== userId)
-      : [...selectedUsers, userId];
-    setSelectedUsers(updatedUsers);
-
-    try {
-      await updateProject({ projectId, allowedUsers: updatedUsers });
-      toast({
-        title: "User access updated successfully",
-      });
-    } catch (error) {
-      console.error("Error updating user access:", error);
-      toast({
-        variant: "destructive",
-        title: "Failed to update user access. Please try again.",
-      });
-    }
-  };
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -105,12 +83,36 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
       fetchUsers();
     }
   }, [projectId, users, isUserLoaded]);
+
   const scrollAreaHeight = useMemo(() => {
     const userCount = memberships?.data?.length || 0;
     const baseHeight = 50; // Height of a single user item
     const maxHeight = 300; // Maximum height of the scroll area
     return Math.min(userCount * baseHeight, maxHeight);
   }, [memberships?.data?.length]);
+
+  if (!memberships) return <NotInOrg />;
+
+  const handleUserToggle = async (userId: string) => {
+    const updatedUsers = selectedUsers.includes(userId)
+      ? selectedUsers.filter((id) => id !== userId)
+      : [...selectedUsers, userId];
+    setSelectedUsers(updatedUsers);
+
+    try {
+      await updateProject({ projectId, allowedUsers: updatedUsers });
+      toast({
+        title: "User access updated successfully",
+      });
+    } catch (error) {
+      console.error("Error updating user access:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to update user access. Please try again.",
+      });
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
