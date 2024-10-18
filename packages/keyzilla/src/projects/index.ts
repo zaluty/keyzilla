@@ -4,12 +4,10 @@ import { Project } from "../types/project";
 import { handleCancellation } from "../helpers/cancel";
 import { getErrorMessage } from "../helpers/getError";
 import { Organization } from "../types/org";
-import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
 
-process.env.NODE_ENV = 'production';
 
 
 // this function fetches the projects from the server

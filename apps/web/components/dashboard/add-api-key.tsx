@@ -36,7 +36,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { toast } from "sonner";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import { Info, Loader2 } from "lucide-react";
 import { Switch } from "../ui/switch";
@@ -49,6 +48,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -89,6 +89,7 @@ export function AddApiKey({
     },
   });
 
+  const { toast } = useToast();
   const isMobile = useMediaQuery("(max-width: 640px)");
 
   const createApiKey = useMutation(api.apiKeys.createApiKey);
@@ -114,12 +115,32 @@ export function AddApiKey({
         name: values.name,
       });
       setLoading(false);
-      toast.success("API Key created successfully");
+      toast({
+        title: "Success",
+        description: "API Key created successfully",
+      });
       form.reset();
       onOpenChange(false);
     } catch (error) {
       setLoading(false);
-      toast.error("Failed to create API Key");
+      if (
+        error instanceof Error &&
+        error.message.includes(
+          " An API key with this name already exists for this project"
+        )
+      ) {
+        toast({
+          title: "Error",
+          description: "API Key with this name already exists for this project",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create API Key",
+          variant: "destructive",
+        });
+      }
     }
   }
 

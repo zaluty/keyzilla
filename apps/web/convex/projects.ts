@@ -145,15 +145,16 @@ export const getProjectByName = query({
         } else {
             project = await ctx.db
                 .query("projects")
-                .filter((q) =>
-                    q.and(
+                 .filter((q) =>
+                        q.and(
                         q.eq(q.field("name"), args.name),
-                        q.eq(q.field("userId"), userId)
+                        q.eq(q.field("userId"), userId),
+                        q.eq(q.field("organizationId"), undefined)
                     )
-                )
-                .first();
+                ).first();
         }
-        return project;
+        console.log(project?.organizationId);
+        return project ;
     }
 })
 

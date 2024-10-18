@@ -32,7 +32,6 @@ const StepsCard = () => (
         <Step title="Enter your project name" />
         <Step title="Add description" />
         <Step title="Configure user access" />
-        <Step title="Create your project" />
         <Step title="Add API keys" />
       </ul>
     </div>

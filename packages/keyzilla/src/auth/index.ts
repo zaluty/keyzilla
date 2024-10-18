@@ -17,7 +17,6 @@ import * as path from 'path';
 import { KeyzillaConfig } from "../types/config";
 
 
-process.env.NODE_ENV = 'production';
 // Add this function to read and parse the config file
 function readConfigFile(): KeyzillaConfig {
   const configPath = path.resolve(process.cwd(), 'keyzilla.config.ts');
@@ -39,6 +38,7 @@ function readConfigFile(): KeyzillaConfig {
     try {
       // Use Function constructor to safely evaluate the config object
       const configObj = new Function(`return (${configString})`)();
+      
       
       // Check if the resulting object has the expected structure
       if (typeof configObj === 'object' && configObj !== null && 'credentials' in configObj) {

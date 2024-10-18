@@ -11,7 +11,6 @@ import { Project } from "../types/project";
 import { ApiKey } from "../types/apikeys";
 
 
-process.env.NODE_ENV = 'production';
 
 interface ProjectConfig {
   projectName: string;

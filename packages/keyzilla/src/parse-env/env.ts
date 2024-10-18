@@ -81,7 +81,7 @@ export { k };
   if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir, { recursive: true });
   }
-  
+   console.log(apiKeys);
   fs.writeFileSync(envFilePath, envFileContent);
 
   console.log(`Environment configuration written successfully  to ${envFilePath}`);

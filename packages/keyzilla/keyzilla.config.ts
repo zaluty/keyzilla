@@ -1,13 +1,4 @@
-import { z } from "zod";
-import { createEnv } from "@t3-oss/env-nextjs";
-import dotenv from "dotenv";
 import { KeyzillaConfig } from "./src/config";
-import path from 'path';
-
-// Load the .env file from the correct location
-dotenv.config({
-    path: path.resolve('.env.local')
-});
 
 export const config = KeyzillaConfig({
     credentials: {

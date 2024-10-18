@@ -21,6 +21,8 @@ function sleep(ms: number) {
  * fetches the projects with `fetchProjects`
  * prompts the user to select the project with `promptProjectSelection`
  * parses the api keys with `parseEnv`
+ * 
+ * creates the env.ts file with the parsed api keys inside the `dist` folder in the node_modules/keyzilla/dist/env.ts file
  */
 async function main() {
   try {
@@ -51,31 +53,36 @@ async function main() {
 
     // we prompt the user to select the project
     const selectedProject = await promptProjectSelection(projects, userData.userId);
-    // we log the selected project
     console.log(`You selected: ${selectedProject}`);
+    
     const sp = spinner();
     sp.start("Parsing API keys...");
-    // we flatten the api keys and map them to the desired format
-    // this is done to make the api keys more readable and to make them easier to parse
-    // the parsed api keys are used to create the env.ts file using the `parseEnv` function in the `parse-env` folder
-    const apiKeys = projects.flatMap((project) => project.apiKeys.map(key => ({
+
+    // Find the project with the selected project name
+    const projectWithKeys = projects.find((project) => project.name === selectedProject);
+
+    // Check if the project and its API keys exist
+    if (!projectWithKeys || !projectWithKeys.apiKeys) {
+      console.error(`No API keys found for the selected project. Please add them here: https://keyzilla.vercel.app/name/${projectWithKeys?.name}?addApiKey=true`);
+      return;
+    }
+
+    // Parse the API keys only for the selected project
+    const apiKeys = projectWithKeys.apiKeys.map(key => ({
       _id: key._id,
       apiKey: key.apiKey,
       isServer: key.isServer,
       name: key.name,
       projectId: key.projectId
-    })));
-    // we parse the api keys
+    }));
+
+    // Parse the API keys
     const parsedEnv = parseEnv(apiKeys);
     await sleep(2000);
     sp.stop("API keys parsed");
-    // we find the project with the selected project name
-    const projectWithKeys = projects.find((project) => project.name === selectedProject);
-    // if no api keys are found for the selected project we log an error and return
-    if (!projectWithKeys || !projectWithKeys.apiKeys) {
-      console.error(`No API keys found for the selected project. Please add them here: https://keyzilla.vercel.app/name/${projectWithKeys?.name}?addApiKey=true`);
-      return;
-    }
+
+    // TODO: Add code to create the env.ts file with the parsed API keys
+    
   } catch (error) {
     // if there is an error we log it and handle the cancellation
     console.error("An error occurred:", getErrorMessage(error));

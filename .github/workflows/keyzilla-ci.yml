@@ -1,4 +1,4 @@
-name: Keyzilla CI
+name: Test and release
 
 on:
   push:

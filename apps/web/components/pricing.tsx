@@ -25,7 +25,10 @@ function PricingTab(props: PricingTabProps) {
         {props.popular && (
           <div className="absolute top-0 right-0 mr-6 -mt-4">
             <div className="inline-flex items-center text-xs font-semibold py-1.5 px-3 bg-primary text-primary-foreground rounded-full shadow-sm shadow-ring/5">
-              Most Popular
+              Most Popular{" "}
+              <span className="text-muted-foreground text-[10px] font-normal">
+                (who are we kidding? )
+              </span>
             </div>
           </div>
         )}
