@@ -1,5 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';
-import fetch from 'node-fetch';
+import { describe, it, expect, vi, beforeEach, afterEach, Mock } from 'vitest';import fetch from 'node-fetch';
 import { text, password, isCancel, cancel, select } from '@clack/prompts';
 import { UserData } from '../src/types/UserData';
 import { ErrorResponse } from '../src/types/error';
@@ -11,7 +10,13 @@ import {
   clearAuthCache,
 } from '../src/auth/lib/authCache';
 import { handleCancellation } from '../src/helpers/cancel';
-import { getProjectConfig, getProjectType, getProjectName, promptProjectType, promptProjectSelection } from '../src/projects';
+import {
+  getProjectConfig,
+  getProjectType,
+  getProjectName,
+  promptProjectType,
+  promptProjectSelection,
+} from '../src/projects';
 import * as fs from 'fs';
 import * as path from 'path';
 import { Project } from '../src/types/project';
@@ -59,7 +64,7 @@ vi.mock('path');
 
 // Mock dotenv
 vi.mock('dotenv', () => ({
-  config: vi.fn(), 
+  config: vi.fn(),
 }));
 
 describe('authenticate', () => {
@@ -183,7 +188,7 @@ describe('authenticate', () => {
     mockCheckAuthentication.mockResolvedValueOnce(cachedUserData);
 
     const result = await authenticate(false);
-    expect(result).toEqual(cachedUserData);  
+    expect(result).toEqual(cachedUserData);
     expect(mockText).not.toHaveBeenCalled();
     expect(mockPassword).not.toHaveBeenCalled();
     expect(mockFetch).not.toHaveBeenCalled();
@@ -195,19 +200,31 @@ describe('fetchProjects', () => {
     const mockProjects = [
       {
         _creationTime: 1729103365772.4788,
-        _id: "j975xv3fxgzbznfhhqc2vqbz8h72sx2v",
+        _id: 'j975xv3fxgzbznfhhqc2vqbz8h72sx2v',
         allowedUsers: [
-          "user_2lIMrqfvKXIV6zGC9jr1TY5TsAw",
-          "user_2lIMrqfvKXIV6zGC9jr1TY5TsAw",
+          'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
+          'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
         ],
-        apiKeys: [],
+        apiKeys: [
+          {
+            _creationTime: 1729285612544.887,
+            _id: 'j57agrb9yq8sr9k6jmvrg2phf172wrjh',
+            apiKey: 'http://localhost:3000/dashboard/hamza',
+            createdAt: 1729285612545,
+            isServer: false,
+            name: 'HAMZA',
+            projectId: 'j975xv3fxgzbznfhhqc2vqbz8h72sx2v',
+            updatedAt: 1729285612545,
+          },
+        ],
         createdAt: 1729103365772,
-        description: "ddd",
-        name: "keyzilla",
+        description: 'ddd',
+        name: 'keyzilla',
         updatedAt: 1729103365772,
-        userId: "user_2lIMrqfvKXIV6zGC9jr1TY5TsAw",
-        userName: "Hamza",
-        userProfile: "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ2l0aHViL2ltZ18ybElNcnMzbElyS0JwM2RnS1g0bWltUEViN3gifQ",
+        userId: 'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
+        userName: 'Hamza',
+        userProfile:
+          'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ2l0aHViL2ltZ18ybElNcnMzbElyS0JwM2RnS1g0bWltUEViN3gifQ',
       },
     ];
 
@@ -226,7 +243,7 @@ describe('fetchProjects', () => {
   it('should use cached authentication for fetchProjects', async () => {
     const cachedUserData: UserData = {
       authenticated: true,
-      
+
       userId: 'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
       organizations: [],
       email: 'hamzaredone6@gmail.com',
@@ -236,19 +253,31 @@ describe('fetchProjects', () => {
     const mockProjects = [
       {
         _creationTime: 1729103365772.4788,
-        _id: "j975xv3fxgzbznfhhqc2vqbz8h72sx2v",
+        _id: 'j975xv3fxgzbznfhhqc2vqbz8h72sx2v',
         allowedUsers: [
-          "user_2lIMrqfvKXIV6zGC9jr1TY5TsAw",
-          "user_2lIMrqfvKXIV6zGC9jr1TY5TsAw",
+          'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
+          'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
         ],
-        apiKeys: [],
+        apiKeys: [
+          {
+            _creationTime: 1729285612544.887,
+            _id: 'j57agrb9yq8sr9k6jmvrg2phf172wrjh',
+            apiKey: 'http://localhost:3000/dashboard/hamza',
+            createdAt: 1729285612545,
+            isServer: false,
+            name: 'HAMZA',
+            projectId: 'j975xv3fxgzbznfhhqc2vqbz8h72sx2v',
+            updatedAt: 1729285612545,
+          },
+        ],
         createdAt: 1729103365772,
-        description: "ddd",
-        name: "keyzilla",
+        description: 'ddd',
+        name: 'keyzilla',
         updatedAt: 1729103365772,
-        userId: "user_2lIMrqfvKXIV6zGC9jr1TY5TsAw",
-        userName: "Hamza",
-        userProfile: "https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ2l0aHViL2ltZ18ybElNcnMzbElyS0JwM2RnS1g0bWltUEViN3gifQ",
+        userId: 'user_2lIMrqfvKXIV6zGC9jr1TY5TsAw',
+        userName: 'Hamza',
+        userProfile:
+          'https://img.clerk.com/eyJ0eXBlIjoicHJveHkiLCJzcmMiOiJodHRwczovL2ltYWdlcy5jbGVyay5kZXYvb2F1dGhfZ2l0aHViL2ltZ18ybElNcnMzbElyS0JwM2RnS1g0bWltUEViN3gifQ',
       },
     ];
     mockFetch.mockResolvedValueOnce({
@@ -263,23 +292,25 @@ describe('fetchProjects', () => {
   });
 });
 
-describe("Automatic project configuration in production", () => {
+describe('Automatic project configuration in production', () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    process.env.NODE_ENV = "production";
-    
+    process.env.NODE_ENV = 'production';
+
     // Mock fs.existsSync to return true for the config file
     (fs.existsSync as Mock).mockImplementation((filePath: string) => {
       return filePath.endsWith('keyzilla.config.ts');
     });
 
     // Mock fs.readFileSync to return a mock config file content
-    (fs.readFileSync as Mock).mockImplementation(() => `
+    (fs.readFileSync as Mock).mockImplementation(
+      () => `
       export const config = {
         projectName: "testProject",
         envType: "org"
       };
-    `);
+    `
+    );
 
     // Mock path.resolve to return a fake path
     (path.resolve as Mock).mockReturnValue('/fake/path/keyzilla.config.ts');
@@ -293,58 +324,64 @@ describe("Automatic project configuration in production", () => {
     vi.resetAllMocks();
   });
 
-  it("should get the project config automatically if the env is production", () => {
+  it('should get the project config automatically if the env is production', () => {
     const result = getProjectConfig();
     expect(result).toEqual({ projectName: 'testProject', envType: 'org' });
   });
 
-  it("should get the project type automatically in production", () => {
+  it('should get the project type automatically in production', () => {
     const result = getProjectType();
     expect(result).toBe('org');
   });
 
-  it("should get the project name automatically in production", () => {
+  it('should get the project name automatically in production', () => {
     const result = getProjectName();
     expect(result).toBe('testProject');
   });
 
-  it("should return automatic project type without prompting in production", async () => {
+  it('should return automatic project type without prompting in production', async () => {
     const result = await promptProjectType();
     expect(result).toBe('org');
     expect(select).not.toHaveBeenCalled();
   });
 
-  it("should return automatic project name without prompting in production", async () => {
-    const mockProjects = [
-      { name: 'testProject' },
-      { name: 'otherProject' }
-    ];
-    const result = await promptProjectSelection(mockProjects as unknown as Project[], 'user123');
+  it('should return automatic project name without prompting in production', async () => {
+    const mockProjects = [{ name: 'testProject' }, { name: 'otherProject' }];
+    const result = await promptProjectSelection(
+      mockProjects as unknown as Project[],
+      'user123'
+    );
     expect(result).toBe('testProject');
     expect(select).not.toHaveBeenCalled();
   });
 
-  it("should throw an error if config file is not found", () => {
+  it('should throw an error if config file is not found', () => {
     (fs.existsSync as Mock).mockReturnValue(false);
-    expect(() => getProjectConfig()).toThrow('keyzilla.config.ts file not found');
+    expect(() => getProjectConfig()).toThrow(
+      'keyzilla.config.ts file not found'
+    );
   });
 
-  it("should throw an error if projectName is not defined in config", () => {
+  it('should throw an error if projectName is not defined in config', () => {
     (fs.readFileSync as Mock).mockReturnValue(`
       export const config = {
         envType: "org"
       };
     `);
-    expect(() => getProjectConfig()).toThrow("projectName and envType must be defined in the keyzilla.config.ts file");
+    expect(() => getProjectConfig()).toThrow(
+      'projectName and envType must be defined in the keyzilla.config.ts file'
+    );
   });
 
-  it("should throw an error if envType is not defined in config", () => {
+  it('should throw an error if envType is not defined in config', () => {
     (fs.readFileSync as Mock).mockReturnValue(`
       export const config = {
         projectName: "testProject"
       };
     `);
-    expect(() => getProjectConfig()).toThrow('envType must be defined in the keyzilla.config.ts file');
+    expect(() => getProjectConfig()).toThrow(
+      'envType must be defined in the keyzilla.config.ts file'
+    );
   });
 
   it("should throw an error if envType is not 'org' or 'personal'", () => {
@@ -354,7 +391,8 @@ describe("Automatic project configuration in production", () => {
         envType: "invalid"
       };
     `);
-    expect(() => getProjectConfig()).toThrow('envType must be either "org" or "personal"');
+    expect(() => getProjectConfig()).toThrow(
+      'envType must be either "org" or "personal"'
+    );
   });
 });
- 
