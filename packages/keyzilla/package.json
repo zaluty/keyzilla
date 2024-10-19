@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "exports": {
     ".": "./dist/env.ts",
-    "./config": "./dist/config/index.ts"
+    "./config": "./dist/config/index.d.ts"
   },
   "bin": {
     "keyzilla": "./dist/cli.js"
