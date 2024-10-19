@@ -111,12 +111,7 @@ export function DropdownMenuDemo({
   const { signOut } = useClerk();
   const { organization } = useOrganization(); // Add this line
 
-  if (!isLoaded) return null;
-  if (!user) return null;
-
-  const handleCommand = () => {
-    setIsCommandOpen(true);
-  };
+  // Moved useEffect to the top level
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key === "s") {
@@ -128,6 +123,13 @@ export function DropdownMenuDemo({
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [router]);
+
+  if (!isLoaded) return null;
+  if (!user) return null;
+
+  const handleCommand = () => {
+    setIsCommandOpen(true);
+  };
 
   const handleSignOut = () => {
     router.push("/");

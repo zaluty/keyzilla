@@ -77,13 +77,10 @@ export { k };
 
   const distDir = path.join(packagePath, 'dist');
   const envFilePath = path.join(distDir, 'env.ts');
-  
   if (!fs.existsSync(distDir)) {
     fs.mkdirSync(distDir, { recursive: true });
   }
-   console.log(apiKeys);
   fs.writeFileSync(envFilePath, envFileContent);
-
   console.log(`Environment configuration written successfully  to ${envFilePath}`);
 
   return envConfig;
