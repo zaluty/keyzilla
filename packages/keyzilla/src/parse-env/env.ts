@@ -3,7 +3,7 @@ import { z } from "zod";
 import { ApiKey } from "../types/apikeys";
 import fs from 'fs';
 import path from 'path';
-
+ 
 
 // this function parses the environment variables
 // it takes an array of api keys as an argument

@@ -5,11 +5,7 @@ import { handleCancellation } from "../helpers/cancel";
 import { getErrorMessage } from "../helpers/getError";
 import { Organization } from "../types/org";
 import fs from 'fs';
-import path from 'path';
-
-
-
-
+import path from 'path'; 
 // this function fetches the projects from the server
 // it takes the project type, the user id and the organization id as arguments
 // and returns an array of projects

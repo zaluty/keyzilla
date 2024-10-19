@@ -296,16 +296,16 @@ export const getProjectUsers = query({
         if (identity === null) {
             throw new ConvexError("Not authenticated");
         }
-   // basic checks 
-        if(identity.orgId){
-            return null;
-       }
+ 
+          
         const project = await ctx.db.get(args.projectId);
         if (!project) {
-            return null; // Project not found
+            return null;  
         }
-         
-        // Check if the user has access to this project
+        if (!project.organizationId) {
+            throw new ConvexError("Project is a personal project");
+        }
+       
         if (!project.allowedUsers?.includes(identity.subject) ) {
             throw new ConvexError("Not authorized to view this project's users");
         }

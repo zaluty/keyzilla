@@ -47,7 +47,7 @@ import Link from "next/link";
 import { CommandDialogs } from "./command";
 import { useRouter } from "next/navigation";
 import AddProjectForm from "./add-project-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CommandShorcutsDialog from "./command-shortcuts-dialog";
 import { useClerk } from "@clerk/nextjs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -58,6 +58,20 @@ export function DashboardHeader() {
   const { user, isLoaded: isUserLoaded } = useUser();
   const { signOut } = useClerk();
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+        event.preventDefault();
+        router.push("/dashboard/settings");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [router]);
+
   if (!user) return null;
   if (!isUserLoaded) return <DashboardHeaderSkeleton />;
   return (
@@ -98,10 +112,22 @@ export function DropdownMenuDemo({
   const { organization } = useOrganization(); // Add this line
 
   if (!isLoaded) return null;
+  if (!user) return null;
 
   const handleCommand = () => {
     setIsCommandOpen(true);
   };
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+        event.preventDefault();
+        router.push("/dashboard/settings");
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
+  }, [router]);
 
   const handleSignOut = () => {
     router.push("/");
@@ -113,7 +139,13 @@ export function DropdownMenuDemo({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>{children}</DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuLabel className=" ">
+            <div className="flex items-center space-x-2">
+              <div className="text-muted-foreground text-[10px]">
+                {user.emailAddresses[0].emailAddress}
+              </div>
+            </div>
+          </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem

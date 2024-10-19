@@ -94,12 +94,13 @@ export async function authenticate(production: boolean): Promise<UserData | null
     const userId = userData.userId;
     const verifiedUserData = await verifyUser(
       userId,
+      email as string,
       secretCode,
       userData.organizations
     );
-
+    const AuthData = verifiedUserData as UserData;
     // At this point, verifiedUserData should always be authenticated
-    saveAuthCache(verifiedUserData);
+    saveAuthCache(AuthData);
     console.log(
       `Authentication successful, run npx keyzilla pull to get your keys`
     );  
@@ -178,6 +179,7 @@ function isValidEmail(email: string): boolean {
 
 async function verifyUser(
   userId: string,
+  email: string,
   secretCode: string,
   organizations: Organization[]
 ): Promise<UserData> {

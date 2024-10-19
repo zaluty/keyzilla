@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useUser, useOrganization } from "@clerk/nextjs";
+import { useUser, useOrganization, Protect } from "@clerk/nextjs";
 import axios from "axios";
 import Image from "next/image";
 import {
@@ -26,6 +26,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
 import {
   Dialog,
   DialogContent,
@@ -126,9 +127,19 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
         </div>
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" className="mt-4 sm:mt-0 w-full sm:w-auto">
-              Manage User Access
-            </Button>
+            <Protect
+              condition={(has) =>
+                has({ permission: "org:sys_memberships:manage" })
+              }
+              fallback={<></>}
+            >
+              <Button
+                variant="outline"
+                className="mt-4 sm:mt-0 w-full sm:w-auto"
+              >
+                Manage User Access
+              </Button>
+            </Protect>
           </DialogTrigger>
           <DialogContent className="max-w-md">
             <ScrollArea className={`h-[${scrollAreaHeight}px] pr-4`}>

@@ -32,6 +32,9 @@ switch (command) {
   case 'prod':
     execSync(`node ${path.join(basePath, 'production/index.js')}`, { stdio: 'inherit' });
     break;
+  case 'whoami':
+    execSync(`node ${path.join(basePath, 'whoami/index.js')}`, { stdio: 'inherit' });
+    break;
   default:
     console.log(`Unknown command: ${command} \n\n here is a list of commands: \n\n login: to login to the keyzilla platform \n\n logout: to logout from the keyzilla platform \n\n pull: to pull the projects from the keyzilla platform \n\n remove: to remove the project from your codebase\n\n prod: to use the keyzilla in production mode\n\n`);
     process.exit(1);

@@ -35,19 +35,6 @@ import { ConvexError } from "convex/values";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import RoleBasedAccessCard from "./Role-Based-Access";
 import { useUser } from "@clerk/nextjs";
-const formSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Name must be at least 2 characters")
-    .max(50, "Name must be less than 50 characters"),
-  description: z
-    .string()
-    .min(2, "Description must be at least 2 characters")
-    .max(50, "Description must be less than 50 characters"),
-  allowedUsers: z.optional(
-    z.array(z.string()).min(0, "At least one user must be selected")
-  ),
-});
 
 interface AddProjectFormProps {
   isOpen: boolean;
@@ -63,6 +50,23 @@ export default function AddProjectForm({
   const { organization } = useOrganization();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const user = useUser();
+  const formSchema = z.object({
+    name: z
+      .string()
+      .min(2, "Name must be at least 2 characters")
+      .max(50, "Name must be less than 50 characters"),
+    description: z
+      .string()
+      .min(2, "Description must be at least 2 characters")
+      .max(50, "Description must be less than 50 characters"),
+    allowedUsers: z
+      .array(z.string())
+      .min(
+        0,
+        "At least one user must be selected, you are allowed to add more users later"
+      ),
+  });
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -78,7 +82,7 @@ export default function AddProjectForm({
     const handleKeyDown = (event: KeyboardEvent) => {
       if ((event.ctrlKey || event.metaKey) && event.key === "n") {
         event.preventDefault();
-        onClose(); // This will toggle the dialog
+        onClose();
       }
     };
 
@@ -163,7 +167,9 @@ export default function AddProjectForm({
                       onUsersChange={field.onChange}
                     />
                   </FormControl>
-                  <FormDescription>Select users with access </FormDescription>
+                  <FormDescription>
+                    Select users with access to this project.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

@@ -99,8 +99,6 @@ export default function RoleBasedAccessCard({
                 className="flex items-center justify-between"
               >
                 <span>
-                  {membership.publicUserData.firstName}{" "}
-                  {membership.publicUserData.lastName}
                   <span className="font-bold text-muted-foreground text-sm">
                     {membership.publicUserData.identifier}
                   </span>
