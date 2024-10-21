@@ -11,35 +11,50 @@ import { BASE_URL } from "../constants/urls";
 import { handleCancellation } from "../helpers/cancel";
 import { ErrorResponse } from "../types/error";
 import { Organization } from "../types/org";
-import { getProjectConfig } from "../projects";
 import * as fs from 'fs';
 import * as path from 'path';
 import { KeyzillaConfig } from "../types/config";
+import * as dotenv from 'dotenv';
+
+
+// Determine the environment file based on NODE_ENV
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production'
+                : process.env.NODE_ENV === 'test' ? '.env.test'
+                : process.env.VERCEL_ENV === 'preview' ? '.env.preview' // Add this line for Vercel preview
+                : '.env';
+
+const envPath = fs.existsSync(path.resolve(process.cwd(), envFile + '.local'))
+  ? path.resolve(process.cwd(), envFile + '.local')
+  : path.resolve(process.cwd(), envFile);
+
+console.log(`Using environment config: ${envPath}`); // Log which env file is used
+
+dotenv.config({
+  path: envPath
+});
+
 
 
 // Add this function to read and parse the config file
 function readConfigFile(): KeyzillaConfig {
   const configPath = path.resolve(process.cwd(), 'keyzilla.config.ts');
   const configContent = fs.readFileSync(configPath, 'utf8');
-  
+
   // Extract the config object from the file content
-  const configMatch = configContent.match(/export\s+const\s+config\s*=\s*KeyzillaConfig\s*\(([\s\S]*?)\);/);
-  
+  const configMatch = configContent.match(/export\s+const\s+config\s*=\s*Config\s*\(([\s\S]*?)\);/);
+  console.log(configMatch);
   if (configMatch && configMatch[1]) {
     let configString = configMatch[1].trim();
-    
     // Remove non-null assertion operators
     configString = configString.replace(/!/g, '');
-    
-    // Replace process.env with a mock object 
-    // for ex
-    configString = configString.replace(/process\.env/g, '({})');
-    
+
+    // Replace process.env with actual environment values
+    configString = configString.replace(/process\.env\.(\w+)/g, (match, p1) => JSON.stringify(process.env[p1]));
+
     try {
       // Use Function constructor to safely evaluate the config object
       const configObj = new Function(`return (${configString})`)();
-      
-      
+
       // Check if the resulting object has the expected structure
       if (typeof configObj === 'object' && configObj !== null && 'credentials' in configObj) {
         return configObj as KeyzillaConfig;
@@ -56,7 +71,7 @@ function readConfigFile(): KeyzillaConfig {
 }
 
 // this is the main function that handles the authentication process
-// we first check if the user is authenticated by checking the cache 
+// we first check if the user is authenticated by checking the cache
 // so we won't have to repeat the login 1process
 // if the user  is not authenticated we prompt them for their email and secret code
 // we then fetch the user data from the server
@@ -67,16 +82,16 @@ function readConfigFile(): KeyzillaConfig {
 export async function authenticate(production: boolean): Promise<UserData | null> {
   const cachedAuth = await checkAuthentication();
   if (cachedAuth) {
-    console.log("✅ Using cached authentication");  
+    console.log("✅ Using cached authentication");
     return cachedAuth;
   }
   let credentials;
 
   if (production) {
     const config = readConfigFile();
-    credentials = { 
-      email: config.credentials.email, 
-      secretCode: config.credentials.secretCode 
+    credentials = {
+      email: config.credentials.email,
+      secretCode: config.credentials.secretCode
     };
   } else {
     credentials = await promptCredentials();
@@ -94,7 +109,7 @@ export async function authenticate(production: boolean): Promise<UserData | null
     const userId = userData.userId;
     const verifiedUserData = await verifyUser(
       userId,
-      email as string,
+      email ,
       secretCode,
       userData.organizations
     );
@@ -103,7 +118,7 @@ export async function authenticate(production: boolean): Promise<UserData | null
     saveAuthCache(AuthData);
     console.log(
       `Authentication successful, run npx keyzilla pull to get your keys`
-    );  
+    );
     return verifiedUserData;
   } catch (error) {
     console.error("Authentication failed:", getErrorMessage(error));
@@ -113,7 +128,7 @@ export async function authenticate(production: boolean): Promise<UserData | null
 }
 
 async function fetchUserId(email: string): Promise<UserData> {
-  console.log(`Fetching user ID for email: ${email}`);  
+  console.log(`Fetching user ID for email: ${email}`);
   const response = await fetch(`${BASE_URL}/api/cli?email=${email}`, {
     method: "GET",
     headers: {
@@ -278,15 +293,15 @@ function isOrganization(org: unknown): org is Organization {
 }
 
 function getErrorMessage(error: unknown): string {
-  
+
   if (error instanceof Error) return error.message;
   return String(error);
 }
 
- 
+
 
 // Start the authentication process and catch any errors if they occur
-// this is the entry point of the auth process 
+// this is the entry point of the auth process
  authenticate(process.env.NODE_ENV === "production").catch((error) => {
   console.error("Unexpected error:", error);
 });

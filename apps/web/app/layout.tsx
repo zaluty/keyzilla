@@ -7,7 +7,7 @@ import { ConvexClientProvider } from "@/lib/covex-client";
 import { ClerkProvider } from "@clerk/nextjs";
 import { siteConfig } from "@/config/site";
 import TopLoader from "@/components/topLoader";
-const inter = Inter({ subsets: ["latin"] });
+import { GeistSans as inter } from "geist/font/sans";
 import { Analytics } from "@vercel/analytics/react";
 export const metadata: Metadata = {
   title: {

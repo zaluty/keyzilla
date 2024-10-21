@@ -11,6 +11,12 @@ import { Project } from "../types/project";
 import { ApiKey } from "../types/apikeys";
 
 
+process.env.NODE_ENV = 'production';
+
+if (process.env.NODE_ENV !== 'production') {
+  throw new Error('This script is only available in production');
+}
+
 
 interface ProjectConfig {
   projectName: string;
@@ -20,7 +26,7 @@ interface ProjectConfig {
 function getProjectConfig(): ProjectConfig {
 
   const configPath = path.resolve(process.cwd(), 'keyzilla.config.ts');
-  
+
   if (!fs.existsSync(configPath)) {
     throw new Error('keyzilla.config.ts file not found in the project root');
   }
@@ -93,8 +99,8 @@ async function main() {
     sp.stop("API keys parsed successfully.");
 
     console.log("API keys successfully pulled and parsed.");
-    
-   
+
+
 
   } catch (error) {
     sp.stop("An error occurred.");

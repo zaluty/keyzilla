@@ -302,9 +302,7 @@ export const getProjectUsers = query({
         if (!project) {
             return null;  
         }
-        if (!project.organizationId) {
-            throw new ConvexError("Project is a personal project");
-        }
+         
        
         if (!project.allowedUsers?.includes(identity.subject) ) {
             throw new ConvexError("Not authorized to view this project's users");

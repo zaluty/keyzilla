@@ -12,6 +12,7 @@ export default defineSchema({
         userId: v.optional(v.string()),
         organizationId: v.optional(v.string()),
         userProfile: v.optional(v.string()),
+        
         userName: v.optional(v.string()),
     }),
     apiKeys: defineTable({

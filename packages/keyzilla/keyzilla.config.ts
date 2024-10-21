@@ -1,15 +1,13 @@
-import { KeyzillaConfig } from "./src/config";
+import { Config } from "./src/config";
 
-export const config = KeyzillaConfig({
+export const config = Config({
     credentials: {
-        email: process.env.EMAIL! || "hamzaredone6@gmail.com",
-        secretCode: process.env.SECRET_CODE! || "skey_e9e5020c022be6cc4d2298fd1b1a51b2"
+        email: process.env.EMAIL!,
+        secretCode: process.env.SECRET_CODE!
     },
     production: {
         projectName:  "keyzilla",
         envType:  "org"
     },
- 
-});
 
- 
+});

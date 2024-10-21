@@ -12,7 +12,6 @@ const path = require('path');
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-console.log(process.env.NEXT_PUBLIC_HAMZA)
 /**
  * this is the main function 
  * it authenticates the user if not authenticated
@@ -28,7 +27,7 @@ async function main() {
   try {
     const userData = await authenticate(process.env.NODE_ENV === 'production');
     if (!userData) {
-      console.log("Authentication failed."); 
+      console.log("Authentication failed.") ; 
       return;
     }
    // we prompt the user to select the project type org | personal

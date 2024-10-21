@@ -308,7 +308,7 @@ export default function Organization() {
           <TabsTrigger value="invitations">Invitations</TabsTrigger>
           <TabsTrigger
             value="settings"
-            className="text-destructive bg-destructive/10 hover:bg-destructive/20"
+            className="text-destructive  hover:bg-destructive/20"
           >
             Danger Zone
           </TabsTrigger>

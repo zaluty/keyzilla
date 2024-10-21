@@ -55,7 +55,6 @@ export function clearAuthCache(): void {
 
 // this function saves the audit data to the audit file
 // it is used to log the user's email and userId
- 
 export function saveAudit(credentials: {
   email: string;
   userId: string;

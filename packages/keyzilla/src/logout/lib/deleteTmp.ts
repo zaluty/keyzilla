@@ -12,7 +12,7 @@ function deleteFile(filePath: string): void {
     console.log(`✅ Successfully deleted authentication cache`);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      console.log(`❌ You are already logged out.`);
+      console.log(`❌ Authentication cache already deleted`);
     } else {
       console.error(`❌ Error deleting ${filePath}:`, error);
     }

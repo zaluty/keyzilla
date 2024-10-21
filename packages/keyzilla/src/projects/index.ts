@@ -5,7 +5,7 @@ import { handleCancellation } from "../helpers/cancel";
 import { getErrorMessage } from "../helpers/getError";
 import { Organization } from "../types/org";
 import fs from 'fs';
-import path from 'path'; 
+import path from 'path';
 // this function fetches the projects from the server
 // it takes the project type, the user id and the organization id as arguments
 // and returns an array of projects
@@ -39,7 +39,7 @@ export async function fetchProjects(
   const projects = JSON.parse(responseText) as Project[];
 
    return projects;
- 
+
 }
 
 /**
@@ -48,7 +48,7 @@ export async function fetchProjects(
  */
 export function getProjectConfig(): { projectName: string, envType: "org" | "personal" } {
   const configPath = path.resolve(process.cwd(), 'keyzilla.config.ts');
-  
+
   if (!fs.existsSync(configPath)) {
     throw new Error('keyzilla.config.ts file not found in the project root');
   }
@@ -58,7 +58,7 @@ export function getProjectConfig(): { projectName: string, envType: "org" | "per
   // Extract projectName and envType using regex
   const projectNameMatch = configContent.match(/projectName:\s*["'](.+?)["']/);
   const envTypeMatch = configContent.match(/envType:\s*["'](.+?)["']/);
-
+  console.log(projectNameMatch, envTypeMatch)
   if (!projectNameMatch || !envTypeMatch) {
     throw new Error('projectName and envType must be defined in the keyzilla.config.ts file');
   }
@@ -90,7 +90,7 @@ export async function promptProjectType(): Promise<"org" | "personal"> {
     const { envType } = getProjectConfig();
     return envType;
   }
-  
+
   const projectType = await select({
     message: "Select an environment?",
     options: [
@@ -110,7 +110,7 @@ export async function promptProjectType(): Promise<"org" | "personal"> {
  * this function prompts the user to select the project
  * it takes the projects and the user id as arguments
  * and returns the project name
- *  @example 
+ *  @example
  *  const projects = await fetchProjects("org", "123", "456");
  *  const projectName = await promptProjectSelection(projects, "123");
  *  console.log(projectName);
@@ -118,12 +118,12 @@ export async function promptProjectType(): Promise<"org" | "personal"> {
 export async function promptProjectSelection(
   projects: Project[],
   userId: string
-): Promise<string> { 
+): Promise<string> {
   if (shouldUseAutomaticConfig()) {
     const { projectName } = getProjectConfig();
     return projectName;
   }
-  
+
   const selectedProject = await select({
     message: "Select a project:",
     options: projects.map((project) => ({
@@ -131,19 +131,19 @@ export async function promptProjectSelection(
       label: project.name,
     })),
   });
- 
+
   if (isCancel(selectedProject)) {
     handleCancellation();
   }
 
   return selectedProject as string;
 }
- 
+
 /**
- *  why is this needed? 
- *  we already have the organization id in the user data the user might have multiple organizations 
+ *  why is this needed?
+ *  we already have the organization id in the user data the user might have multiple organizations
  *  without this function the project fetching will get the first `orgID` in the array
- * 
+ *
  * this function prompts the user to select the organization
  * it takes the organizations as arguments
  * and returns the organization id
