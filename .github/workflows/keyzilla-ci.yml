@@ -39,8 +39,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
           cache-dependency-path: packages/keyzilla/package.json
-      - name: npm audit
-        run: npm audit signature 
+      - name: npm lint
+        run: npm run lint
       - name: Install dependencies
         run: npm install
       - name: Run build
