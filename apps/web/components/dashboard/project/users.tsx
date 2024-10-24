@@ -94,14 +94,30 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
 
   if (!memberships) return <NotInOrg />;
 
-  const handleUserToggle = async (userId: string) => {
-    const updatedUsers = selectedUsers.includes(userId)
-      ? selectedUsers.filter((id) => id !== userId)
-      : [...selectedUsers, userId];
-    setSelectedUsers(updatedUsers);
+  const handleUserToggle = (userId: string) => {
+    setTempSelectedUsers((prevSelectedUsers) =>
+      prevSelectedUsers.includes(userId)
+        ? prevSelectedUsers.filter((id) => id !== userId)
+        : [...prevSelectedUsers, userId]
+    );
+  };
 
+  // Add state to control dialog visibility
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  // Add a new state for temporary storage of selected users
+  const [tempSelectedUsers, setTempSelectedUsers] = useState<string[]>([]);
+
+  useEffect(() => {
+    setTempSelectedUsers(selectedUsers);
+  }, [selectedUsers]);
+
+  // Add a function to apply changes
+  const applyChanges = async () => {
     try {
-      await updateProject({ projectId, allowedUsers: updatedUsers });
+      await updateProject({ projectId, allowedUsers: tempSelectedUsers });
+      setSelectedUsers(tempSelectedUsers);
+      setIsDialogOpen(false); // Close dialog after applying changes
       toast({
         title: "User access updated successfully",
       });
@@ -125,7 +141,7 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
           </span>
           <InfoIcon />
         </div>
-        <Dialog>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Protect
               condition={(has) =>
@@ -136,6 +152,8 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
               <Button
                 variant="outline"
                 className="mt-4 sm:mt-0 w-full sm:w-auto"
+                onClick={() => setIsDialogOpen(true)} 
+                disabled={selectedUsers.length === 0}
               >
                 Manage User Access
               </Button>
@@ -161,7 +179,7 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
                       </span>
                     </span>
                     <Checkbox
-                      checked={selectedUsers.includes(
+                      checked={tempSelectedUsers.includes(
                         membership.publicUserData?.userId ?? ""
                       )}
                       onCheckedChange={() =>
@@ -172,6 +190,13 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
                 ))}
               </ul>
             </ScrollArea>
+            <Button
+              variant="outline"
+              className="mt-4"
+              onClick={applyChanges}
+            >
+              Apply Changes
+            </Button>
           </DialogContent>
         </Dialog>
       </CardHeader>

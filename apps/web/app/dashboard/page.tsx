@@ -39,7 +39,6 @@ export default function DashboardPage() {
     { organizationId: organization?.id || "" },
     { initialNumItems: ITEMS_PER_PAGE }
   );
-
   // Add this new state to track the total count of projects
   const [totalProjectCount, setTotalProjectCount] = useState<number>(0);
 
@@ -177,7 +176,7 @@ export default function DashboardPage() {
                     }
                   />
                 </PaginationItem>
-                {[...Array(totalPages)].map((_, index) => (
+                {[...Array(totalPages)].map((q, index) => (
                   <PaginationItem key={index}>
                     <PaginationLink
                       aria-disabled={index === 1 && results.length < 9}
@@ -204,9 +203,10 @@ export default function DashboardPage() {
                       currentPage === totalPages - 1 || results.length < 9
                     }
                     className={
-                      currentPage === totalPages - 1 || results.length < 9
+                      "cursor-pointer bg-red-500" +
+                      (currentPage === totalPages - 1 || results.length < 9
                         ? "pointer-events-none opacity-50"
-                        : ""
+                        : "")
                     }
                   />
                 </PaginationItem>

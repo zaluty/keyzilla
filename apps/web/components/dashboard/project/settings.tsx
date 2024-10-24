@@ -9,18 +9,18 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Dialog, DialogTitle, DialogHeader, DialogContent } from '@/components/ui/dialog';
 import { AlertCircle } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { Doc } from "@/convex/_generated/dataModel";
 import { useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-
+import { useToast } from "@/hooks/use-toast";
 export default function Settings(props: { project: Doc<"projects"> }) {
   const { project } = props;
   const deleteProjectById = useMutation(api.projects.deleteProjectById);
@@ -28,6 +28,7 @@ export default function Settings(props: { project: Doc<"projects"> }) {
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const [projectName, setProjectName] = useState(project.name);
+  const [projectDeleting, setProjectDeleting] = useState(false);
   const [projectDescription, setProjectDescription] = useState(
     project.description
   );
@@ -35,17 +36,26 @@ export default function Settings(props: { project: Doc<"projects"> }) {
   const isChanged =
     projectName.trim() !== project.name.trim() ||
     projectDescription.trim() !== project.description.trim();
-
+const {toast} = useToast()
   const handleDelete = async () => {
-    setIsDeleting(true);
+    setProjectDeleting(true);
+    if (projectDeleting) {
     try {
       await deleteProjectById({ id: project._id });
       router.push("/dashboard");
-      toast.success("Project deleted successfully");
+      toast({
+        title: "Project deleted successfully",
+        description: "You can add a new project from the dashboard",
+      });
     } catch (error) {
       console.error("Failed to delete project:", error);
       setIsDeleting(false);
-      toast.error("Failed to delete project");
+      toast({
+        title: 'Error deleting project',
+        variant: 'destructive',
+        description: 'Please try again later',
+      });
+      }
     }
   };
 
@@ -57,10 +67,17 @@ export default function Settings(props: { project: Doc<"projects"> }) {
         name: projectName.trim(),
         description: projectDescription.trim(),
       });
-      toast.success("Project updated successfully");
+      toast({
+        title: "Project updated successfully",
+        description: "You can see the changes in the project page",
+      });
     } catch (error) {
       console.error("Failed to update project:", error);
-      toast.error("Failed to update project");
+      toast({
+        title: 'Error updating project',
+        variant: 'destructive',
+        description: 'Please try again later',
+      });
     }
   };
 
@@ -104,7 +121,12 @@ export default function Settings(props: { project: Doc<"projects"> }) {
         </div>
 
         <Separator />
-
+        <DeleteProjectDialog
+          name={project.name}
+          deleteProject={projectDeleting}
+          setDeleteProject={setProjectDeleting}
+          onDeleteProject={handleDelete}
+        />
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Danger Zone</AlertTitle>
@@ -123,5 +145,20 @@ export default function Settings(props: { project: Doc<"projects"> }) {
         </Alert>
       </CardContent>
     </Card>
+  );
+}
+
+function DeleteProjectDialog({ deleteProject, name, setDeleteProject, onDeleteProject }: { deleteProject: boolean, name: string, setDeleteProject: (deleteProject: boolean) => void, onDeleteProject: () => void }) {
+  return (
+    <Dialog open={deleteProject} onOpenChange={setDeleteProject}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Confirm Deletion</DialogTitle>
+        </DialogHeader>
+        <p>Are you sure you want to delete <span className="font-bold">{name}</span>?</p>
+        <Button variant="destructive" onClick={onDeleteProject}>Confirm Delete</Button>
+        <Button variant="outline" onClick={() => setDeleteProject(false)}>Cancel</Button>
+      </DialogContent>
+    </Dialog>
   );
 }

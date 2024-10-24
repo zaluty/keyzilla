@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { authenticate } from "../auth";
-import { fetchProjects, promptProjectType, promptProjectSelection, promptOrganizationSelection } from "./index"; // Ensure promptOrganizationSelection is implemented
+import { fetchProjects, promptProjectType, promptProjectSelection, promptOrganizationSelection, returnProjectAnalytics } from "./index"; // Ensure promptOrganizationSelection is implemented
 import { handleCancellation } from "../helpers/cancel";
 import { getErrorMessage } from "../helpers/getError";
 import { Organization } from "../types/org";
@@ -44,6 +44,7 @@ async function main() {
 
     // we fetch the projects from the server
     const projects = await fetchProjects(projectType, userData.userId, organizationId as string);
+    
     // if no projects are found we log an error and return
     if (projects.length === 0) {
       console.log("No projects found. Please create a project first: https://keyzilla.vercel.app/dashboard");
@@ -53,16 +54,17 @@ async function main() {
     // we prompt the user to select the project
     const selectedProject = await promptProjectSelection(projects, userData.userId);
     console.log(`You selected: ${selectedProject}`);
-    
+      
     const sp = spinner();
     sp.start("Parsing API keys...");
-
+    // we record the analytics data
+    returnProjectAnalytics({projectId: projects.find((project) => project.name === selectedProject)?._id as string, projectName: selectedProject, userId: userData.userId});
     // Find the project with the selected project name
     const projectWithKeys = projects.find((project) => project.name === selectedProject);
 
     // Check if the project and its API keys exist
     if (!projectWithKeys || !projectWithKeys.apiKeys) {
-      console.error(`No API keys found for the selected project. Please add them here: https://keyzilla.vercel.app/name/${projectWithKeys?.name}?addApiKey=true`);
+      console.error(`No API keys found for the selected project. Please add them here: https://keyzilla.vercel.app/dashboard/${projectWithKeys?.name}?addApiKey=true`);
       return;
     }
 

@@ -62,6 +62,7 @@ export default function EditApiKey({
 }) {
   const updateApiKey = useMutation(api.apiKeys.updateApiKey);
   const { organization } = useOrganization();
+  const [deleteProject, setDeleteProject] = useState(false);
   const deleteApiKey = useMutation(api.apiKeys.deleteApiKey);
   const [isDeleting, setIsDeleting] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -74,16 +75,21 @@ export default function EditApiKey({
 
   const isMobile = useMediaQuery("(max-width: 640px)");
 
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false); // State to control visibility of delete dialog
+
   const handleDeleteApiKey = async () => {
-    try {
-      setIsDeleting(true);
-      await deleteApiKey({ apiKeyId });
-      toast.success("API Key deleted successfully");
-      setIsDeleting(false);
-      onOpenChange(false);
-    } catch (error) {
-      setIsDeleting(false);
-      toast.error("Failed to delete API Key");
+    setShowDeleteDialog(true);
+    if (showDeleteDialog) {
+      try {
+        setIsDeleting(true);
+        await deleteApiKey({ apiKeyId });
+        toast.success("API Key deleted successfully");
+        setIsDeleting(false);
+        onOpenChange(false);
+      } catch (error) {
+        setIsDeleting(false);
+        toast.error("Failed to delete API Key");
+      }
     }
   };
 
@@ -189,6 +195,11 @@ export default function EditApiKey({
           </div>
         </AlertDescription>
       </Alert>
+      <DeleteApiKeyDialog
+        deleteApiKey={showDeleteDialog}
+        setDeleteApiKey={setShowDeleteDialog}
+        onDeleteApiKey={handleDeleteApiKey}
+      />
     </>
   );
 
@@ -241,3 +252,20 @@ function SwitchTooltip() {
     </TooltipProvider>
   );
 }
+
+function DeleteApiKeyDialog({ deleteApiKey, setDeleteApiKey, onDeleteApiKey }: { deleteApiKey: boolean, setDeleteApiKey: (deleteApiKey: boolean) => void, onDeleteApiKey: () => void }) {
+  return (
+    <Dialog open={deleteApiKey} onOpenChange={setDeleteApiKey}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Confirm Deletion</DialogTitle>
+        </DialogHeader>
+        <p>Are you sure you want to delete this API Key?</p>
+        <Button variant="destructive" onClick={onDeleteApiKey}>Confirm Delete</Button>
+        <Button variant="outline" onClick={() => setDeleteApiKey(false)}>Cancel</Button>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+

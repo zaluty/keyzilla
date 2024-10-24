@@ -1,5 +1,9 @@
 import { v } from "convex/values";
-import { query } from "./_generated/server";
+import { query, internalMutation } from "./_generated/server";
+import { api, internal } from "./_generated/api";
+
+
+
 
 export const getProjects = query({
     args: { organizationId: v.optional(v.string()), enabled: v.optional(v.boolean()) },
@@ -47,6 +51,7 @@ export const getCliProjects = query({
         if (!args.userId) {
             return [];
         }
+
         const projects = await ctx.db
             .query("projects")
             .filter((q) => {
@@ -73,7 +78,7 @@ export const getCliProjects = query({
                 .collect();
             return { ...project, apiKeys };
         }));
-
+      
         return projectsWithApiKeys;
     },
 });

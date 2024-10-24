@@ -42,7 +42,7 @@
     "convex": "^1.14.4",
     "date-fns": "^3.6.0",
     "framer-motion": "^11.3.30",
-    "keyzilla": "^0.0.14-dev",
+    "keyzilla": "^1.9.1-dev",
     "lemonsqueezy.ts": "^0.1.7",
     "lucide-react": "^0.436.0",
     "micro": "^10.0.1",

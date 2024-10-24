@@ -42,6 +42,21 @@ export async function fetchProjects(
 
 }
 
+
+
+/**
+ * this is an internal function that is used to record analytics data
+ * it takes the project id, the project name and the user id as arguments
+ * does not return anything
+ * so in the dashboard we can see which projects are being used the most by the teams you have 
+ */
+export async function returnProjectAnalytics({projectId, projectName, userId}: {projectId: string, projectName: string, userId: string}) {
+  await fetch(`${BASE_URL}/api/analytics?projectId=${projectId}&projectName=${projectName}&userId=${userId}`, {
+    method: "GET",
+  })
+}
+
+
 /**
  * This function reads the project configuration from the keyzilla.config.ts file
  * @returns An object containing the project name and environment type

@@ -3,7 +3,10 @@ import { z } from "zod";
 import { ApiKey } from "../types/apikeys";
 import fs from 'fs';
 import path from 'path';
- 
+import dotenv from 'dotenv';
+
+// Load environment variables from .env.local
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 // this function parses the environment variables
 // it takes an array of api keys as an argument
@@ -13,7 +16,6 @@ import path from 'path';
 // ? how about we bundle the env.ts file within the keyzilla dist file and then edit it with the api keys?
 const parseEnv = (apiKeys: ApiKey[]) => {
   const isProd = process.env.NODE_ENV === 'production';
-
   const envConfig = {
     client: Object.fromEntries(
       apiKeys
@@ -31,10 +33,42 @@ const parseEnv = (apiKeys: ApiKey[]) => {
     runtimeEnv: Object.fromEntries(
       apiKeys.map(key => {
         const envKey = key.isServer ? key.name : (key.name.startsWith('NEXT_PUBLIC_') ? key.name : `NEXT_PUBLIC_${key.name}`);
-        return [envKey, isProd ? process.env[envKey] || '' : key.apiKey];
+        return [envKey, process.env[envKey] || key.apiKey]; // Now includes .env.local variables
       })
     ),
   };
+
+  // Ensure .env.local exists and write environment variables to it
+  const envLocalPath = path.resolve(process.cwd(), '.env.local');
+  try {
+    if (!fs.existsSync(envLocalPath)) {
+      fs.writeFileSync(envLocalPath, ''); // Create the file if it does not exist
+      console.log('.env.local file created');
+    }
+    // Prepare content to write to .env.local
+    const envLocalContent = apiKeys.map(key => {
+      const envKey = key.isServer ? key.name : (key.name.startsWith('NEXT_PUBLIC_') ? key.name : `NEXT_PUBLIC_${key.name}`);
+      const envValue = process.env[envKey] || key.apiKey;
+      return `${envKey}=${envValue}`;
+    }).join('\n');
+    fs.appendFileSync(envLocalPath, envLocalContent + '\n'); // Append new environment variables
+    console.log('Environment variables written to .env.local');
+  } catch (error) {
+    console.error('Error handling .env.local file:', error);
+  }
+
+  // Ensure .env.local is in .gitignore
+  const gitignorePath = path.resolve(process.cwd(), '.gitignore');
+  try {
+    let gitignoreContent = fs.readFileSync(gitignorePath, 'utf8');
+    if (!gitignoreContent.includes('.env.local')) {
+      gitignoreContent += '\n.env.local\n';
+      fs.writeFileSync(gitignorePath, gitignoreContent);
+      console.log('.env.local added to .gitignore');
+    }
+  } catch (error) {
+    console.error('Error updating .gitignore:', error);
+  }
 
   // Generate the content for env.ts
   const envFileContent = `

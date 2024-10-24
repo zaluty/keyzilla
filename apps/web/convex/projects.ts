@@ -8,7 +8,7 @@ import { getManyFrom,   } from "convex-helpers/server/relationships";
 
 /**
  * Create a new project
- * 
+ *
  * If organizationId is provided, it will create a project in the specified organization.
  * If organizationId is not provided, it will create a personal project.
  * ------------------------------------------------------
@@ -72,7 +72,7 @@ export const createProject = mutation({
 
 /**
  * Get all projects
- * 
+ *
  * If organizationId is provided, it will search for all projects in the specified organization.
  * If organizationId is not provided, it will search for all personal projects.
  * ------------------------------------------------------
@@ -85,7 +85,7 @@ export const getProjects = query({
         const identity = await ctx.auth.getUserIdentity();
         if (identity === null) {
             throw new Error("Not authenticated");
-        } 
+        }
 
         const userId = identity.subject;
 
@@ -95,7 +95,7 @@ export const getProjects = query({
                 if (args.organizationId) {
                     return q.eq(q.field("organizationId"), args.organizationId);
                 } else {
-                    return q.or( 
+                    return q.or(
                         q.eq(q.field("organizationId"), undefined),
                         q.eq(q.field("organizationId"), null)
                     );
@@ -112,7 +112,7 @@ export const getProjects = query({
 
 /**
  * Get a project by name and organizationId (optional)
- * 
+ *
  * If organizationId is provided, it will search for a project in the specified organization.
  * If organizationId is not provided, it will search for a personal project.
  * ------------------------------------------------------
@@ -130,7 +130,7 @@ export const getProjectByName = query({
             throw new Error("Not authenticated");
         }
         const userId = identity.subject;
-
+         
         let project;
         if (args.organizationId) {
             project = await ctx.db
@@ -145,16 +145,20 @@ export const getProjectByName = query({
         } else {
             project = await ctx.db
                 .query("projects")
-                 .filter((q) =>
-                        q.and(
+                .filter((q) =>
+                    q.and(
                         q.eq(q.field("name"), args.name),
                         q.eq(q.field("userId"), userId),
                         q.eq(q.field("organizationId"), undefined)
                     )
-                ).first();
+                )
+                .first();
         }
-        console.log(project?.organizationId);
-        return project ;
+
+        // Check if the project exists and if the user is allowed to access it
+        if (project && project.allowedUsers?.includes(userId)) {
+            return project;
+        }
     }
 })
 
@@ -195,8 +199,8 @@ export const updateProject = mutation({
 })
 
 /**
- * Delete a project by id   
- * 
+ * Delete a project by id
+ *
  */
 export const deleteProjectById = mutation({
     args: { id: v.id("projects") },
@@ -218,7 +222,7 @@ export const deleteProjectById = mutation({
 
 /**
  * Get projects with pagination
- * 
+ *
  * If organizationId is provided, it will search for all projects in the specified organization.
  * If organizationId is not provided, it will search for all personal projects.
  */
@@ -257,7 +261,7 @@ export const getPaginatedProjects = query({
     },
 })
 
- 
+
 
 export const updateProjectAllowedUsers = mutation({
     args: {
@@ -275,7 +279,7 @@ export const updateProjectAllowedUsers = mutation({
             throw new ConvexError("Project not found");
         }
 
-        
+
         if (project.userId !== identity.subject) {
             throw new ConvexError("Not authorized to update this project");
         }
@@ -296,14 +300,14 @@ export const getProjectUsers = query({
         if (identity === null) {
             throw new ConvexError("Not authenticated");
         }
- 
-          
+
+
         const project = await ctx.db.get(args.projectId);
         if (!project) {
-            return null;  
+            return null;
         }
-         
-       
+
+
         if (!project.allowedUsers?.includes(identity.subject) ) {
             throw new ConvexError("Not authorized to view this project's users");
         }
@@ -312,5 +316,11 @@ export const getProjectUsers = query({
     }
 });
 
- 
+
+export const getProjectAnalytics = query({
+    args: { projectId: v.id("projects"), projectName: v.optional(v.string()) },
+    handler: async (ctx, args) => {
+        return await ctx.db.query("analytics").filter((q) => q.eq(q.field("projectId"), args.projectId) && q.eq(q.field("projectName"), args.projectName)).collect();
+    }
+})
 

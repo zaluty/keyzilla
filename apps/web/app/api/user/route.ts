@@ -19,10 +19,7 @@ export async function POST(request: NextRequest) {
   if (!userIds || !Array.isArray(userIds) || userIds.length === 0) {
     return NextResponse.json({ error: "User IDs are required and must be an array" }, { status: 400 });
   }
-  console.log(createClerkClient({secretKey: process.env.CLERK_SECRET_KEY}).allowlistIdentifiers.createAllowlistIdentifier({
-    identifier: "test@test.com",
-    notify: false 
-  }))
+ 
   try {
     const users = await clerkClient.users.getUserList({
       userId: userIds,

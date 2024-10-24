@@ -65,7 +65,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider supportEmail="support@keyzilla.dev" >
       <ConvexClientProvider>
         <html lang="en">
           <body className={inter.className}>

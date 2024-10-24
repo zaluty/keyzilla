@@ -12,8 +12,8 @@ export default defineSchema({
         userId: v.optional(v.string()),
         organizationId: v.optional(v.string()),
         userProfile: v.optional(v.string()),
-        
         userName: v.optional(v.string()),
+        howManyTimes: v.optional(v.number()),
     }),
     apiKeys: defineTable({
         projectId: v.id("projects"),
@@ -30,6 +30,15 @@ export default defineSchema({
         secret: v.string(),
         createdAt: v.number(),
         updatedAt: v.number(),
+    }),
+    analytics: defineTable({
+        projectId: v.id("projects"),
+        userId: v.string(),
+        createdAt: v.number(),
+        updatedAt: v.number(),
+        userName: v.optional(v.string()),
+        projectName: v.optional(v.string()),
+        howManyTimes: v.optional(v.number()),
     })
 });
 
