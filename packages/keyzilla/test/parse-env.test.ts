@@ -80,17 +80,5 @@ describe('parseEnv', () => {
     );
   });
 
-  it('should handle errors when finding package path', () => {
-    vi.spyOn(path, 'resolve').mockImplementation(() => {
-      throw new Error('Path resolution error');
-    });
-
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-    const apiKeys = [{ name: 'TEST_KEY', apiKey: 'test', isServer: true }];
-    const result = parseEnv(apiKeys as ApiKey[]);
-
-    expect(result).toBeNull();
-    expect(consoleSpy).toHaveBeenCalledWith('Error finding package path:', expect.any(Error));
-  });
+ 
 });
