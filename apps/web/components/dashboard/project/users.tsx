@@ -1,4 +1,3 @@
-"use client";
 import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMutation, useQuery } from "convex/react";
@@ -7,33 +6,14 @@ import { Id } from "@/convex/_generated/dataModel";
 import { useUser, useOrganization, Protect } from "@clerk/nextjs";
 import axios from "axios";
 import Image from "next/image";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Info } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { OrgSwitcher } from "../Org-switcher";
@@ -51,39 +31,43 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
-
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
+  const [tempSelectedUsers, setTempSelectedUsers] = useState<string[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const filteredMemberships = useMemo(() => {
     return memberships?.data || [];
   }, [memberships?.data]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      if (!users || users.length === 0) {
-        setIsLoading(false);
-        return;
-      }
-
-      setIsLoading(true);
-      try {
-        const response = await axios.post(`/api/user?projectId=${projectId}`, {
-          userIds: users,
-        });
-        setUserData(response.data.users);
-        setSelectedUsers(users);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        setError(`Failed to fetch user data. Please try again later.`);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     if (isUserLoaded && users !== undefined) {
+      const fetchUsers = async () => {
+        if (!users || users.length === 0) {
+          setIsLoading(false);
+          return;
+        }
+
+        setIsLoading(true);
+        try {
+          const response = await axios.post(`/api/user?projectId=${projectId}`, {
+            userIds: users,
+          });
+          setUserData(response.data.users);
+          setSelectedUsers(users);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+          setError(`Failed to fetch user data. Please try again later.`);
+        } finally {
+          setIsLoading(false);
+        }
+      };
       fetchUsers();
     }
   }, [projectId, users, isUserLoaded]);
+
+  useEffect(() => {
+    setTempSelectedUsers(selectedUsers);
+  }, [selectedUsers]);
 
   const scrollAreaHeight = useMemo(() => {
     const userCount = memberships?.data?.length || 0;
@@ -102,17 +86,6 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
     );
   };
 
-  // Add state to control dialog visibility
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-
-  // Add a new state for temporary storage of selected users
-  const [tempSelectedUsers, setTempSelectedUsers] = useState<string[]>([]);
-
-  useEffect(() => {
-    setTempSelectedUsers(selectedUsers);
-  }, [selectedUsers]);
-
-  // Add a function to apply changes
   const applyChanges = async () => {
     try {
       await updateProject({ projectId, allowedUsers: tempSelectedUsers });
@@ -152,7 +125,7 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
               <Button
                 variant="outline"
                 className="mt-4 sm:mt-0 w-full sm:w-auto"
-                onClick={() => setIsDialogOpen(true)} 
+                onClick={() => setIsDialogOpen(true)}
                 disabled={selectedUsers.length === 0}
               >
                 Manage User Access
