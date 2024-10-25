@@ -15,10 +15,10 @@ import {
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -41,28 +41,34 @@ import { AlertCircle, Info } from "lucide-react";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Protect, useOrganization } from "@clerk/nextjs";
 import { useMediaQuery } from "@/hooks/use-media-query";
-
+ 
 const formSchema = z.object({
   apiKeyValue: z.string().optional(),
   name: z.string().optional(),
   isServer: z.boolean().optional(),
   apiKeyName: z.string().optional(),
 });
+ interface ApiKey {
+  _id: Id<"apiKeys">;
+ 
+}
 
 export default function EditApiKey({
   apiKeyId,
   isOpen,
   onOpenChange,
+  projectId,
   apiKeyName,
 }: {
   apiKeyId: Id<"apiKeys">;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   apiKeyName: string;
+  projectId: Id<"projects">;
 }) {
   const updateApiKey = useMutation(api.apiKeys.updateApiKey);
+  const getApiKey = useQuery(api.apiKeys.getApiKeys, { projectId });
   const { organization } = useOrganization();
-  const [deleteProject, setDeleteProject] = useState(false);
   const deleteApiKey = useMutation(api.apiKeys.deleteApiKey);
   const [isDeleting, setIsDeleting] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -72,38 +78,47 @@ export default function EditApiKey({
       isServer: false,
     },
   });
-
+  const apiKey = getApiKey?.find((ak: ApiKey) => ak._id === apiKeyId);
   const isMobile = useMediaQuery("(max-width: 640px)");
-
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false); // State to control visibility of delete dialog
-
-  const handleDeleteApiKey = async () => {
+  const { toast } = useToast();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false); // State to control visibility of delete dialog this comment is defenitely written by AI
+    const handleDeleteApiKey = async () => {
     setShowDeleteDialog(true);
     if (showDeleteDialog) {
       try {
         setIsDeleting(true);
         await deleteApiKey({ apiKeyId });
-        toast.success("API Key deleted successfully");
+        toast({
+          title: "API Key deleted successfully",
+        });
         setIsDeleting(false);
         onOpenChange(false);
       } catch (error) {
         setIsDeleting(false);
-        toast.error("Failed to delete API Key");
+        toast({
+          title: "Failed to delete API Key",
+        });
       }
     }
   };
-
+  const disabled = isDeleting || !apiKey?.apiKey || apiKey?.apiKey === form.getValues("apiKeyValue") || !form.getValues("apiKeyName");
   const handleUpdateApiKey = async (values: z.infer<typeof formSchema>) => {
     try {
       await updateApiKey({
         apiKeyId,
-        value: values.apiKeyValue || "",
+        value: values.apiKeyValue || apiKey?.apiKey || "",
         isServer: values.isServer,
+        name: values.apiKeyName || apiKey?.name || ""
       });
-      toast.success("API Key updated successfully");
+      toast({
+        title: "API Key updated successfully",
+      });
       onOpenChange(false);
+      form.reset();
     } catch (error) {
-      toast.error("Failed to update API Key");
+      toast({
+        title: "Failed to update API Key",
+      });
     }
   };
 
@@ -125,7 +140,7 @@ export default function EditApiKey({
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder="Enter new API key name"
+                    placeholder={apiKey?.name || "enter new API key name"}
                     className="mt-1"
                   />
                 </FormControl>
@@ -142,7 +157,7 @@ export default function EditApiKey({
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder="Enter new API key value"
+                    placeholder={apiKey?.apiKey || "enter new API key value"}
                     className="mt-1"
                   />
                 </FormControl>
@@ -163,6 +178,7 @@ export default function EditApiKey({
                     <SwitchTooltip />
                     <FormControl>
                       <Switch
+                        defaultChecked={!apiKey?.isServer}
                         checked={field.value}
                         onCheckedChange={field.onChange}
                       />
@@ -173,7 +189,7 @@ export default function EditApiKey({
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full mt-4">
+          <Button type="submit" className="w-full mt-4 cursor-pointer" disabled={isDeleting || !apiKey?.apiKey || apiKey?.apiKey === form.getValues("apiKeyValue")}>
             Update API Key
           </Button>
         </form>
@@ -182,8 +198,7 @@ export default function EditApiKey({
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Danger Zone</AlertTitle>
         <AlertDescription>
-          Deleting this API Key will permanently remove it.
-          {apiKeyName}
+          Deleting <span className="font-bold text-black dark:text-white">{apiKeyName}</span> API Key will permanently remove it.
           <div className="mt-3 flex justify-end items-end">
             <Button
               variant="destructive"
@@ -220,6 +235,7 @@ export default function EditApiKey({
       </Drawer>
     );
   }
+  
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -267,5 +283,7 @@ function DeleteApiKeyDialog({ deleteApiKey, setDeleteApiKey, onDeleteApiKey }: {
     </Dialog>
   );
 }
+
+
 
 

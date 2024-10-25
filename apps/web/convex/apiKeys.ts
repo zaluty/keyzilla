@@ -2,6 +2,19 @@
     import { mutation, query } from "./_generated/server";
     import { Id } from "./_generated/dataModel";
     import { ConvexError } from "convex/values";
+
+    export const getApiKeysSearch = query({
+        args: { searchTerm: v.string() },
+        handler: async (ctx, args) => {
+            if (!args.searchTerm) return [];
+            return await ctx.db
+                .query("apiKeys")
+                .filter((q) => q.eq(q.field("name"), args.searchTerm))
+                .collect();
+        }
+    });
+
+
     export const getApiKeys = query({
         args: { projectId: v.id("projects") },
         handler: async (ctx, args) => {
@@ -58,14 +71,15 @@
             apiKeyId: v.id("apiKeys"),
             value: v.string(),
             isServer: v.optional(v.boolean()),
-
+            name: v.optional(v.string())
         },
         handler: async (ctx, args) => {
             const now = Date.now();
             return await ctx.db.patch(args.apiKeyId, {
                 apiKey: args.value,
                 updatedAt: now,
-                isServer: args.isServer
+                isServer: args.isServer,
+                name: args.name
             });
         }
     });

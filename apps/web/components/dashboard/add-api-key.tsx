@@ -55,7 +55,8 @@ const formSchema = z.object({
   apiKey: z
     .string()
     .min(1, "API Key is required")
-    .refine((value) => !/\s/.test(value), "API Key should not contain spaces"),
+    .refine((value) => !/\s/.test(value), "API Key should not contain spaces")
+    .refine((value) => !value.startsWith('NEXT_PUBLIC'), "API Key should not start with 'NEXT_PUBLIC'"), // Ensure API Key does not start with 'NEXT_PUBLIC'
   isServer: z.boolean(),
 });
 

@@ -26,7 +26,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 import React from "react";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import Settings from "@/components/dashboard/project/settings";
@@ -64,7 +64,7 @@ export default function ProjectPage({ params }: { params: { name: string } }) {
     name: decodeURIComponent(params.name),
     organizationId: organization?.id || "",
   });
-
+  const { toast } = useToast();
   useEffect(() => {
     if (project) {
       setProjectId(project._id);
@@ -108,24 +108,34 @@ export default function ProjectPage({ params }: { params: { name: string } }) {
       });
       setNewApiKey("");
       setNewApiKeyName("");
-      toast.success("API Key created successfully");
+      toast({
+        title: "API Key created successfully",
+      });
     } catch (error) {
-      toast.error("Failed to create API Key");
+      toast({
+        title: "Failed to create API Key",
+      });
     }
   };
 
   const handleDeleteApiKey = async (apiKeyId: Id<"apiKeys">) => {
     try {
       await deleteApiKey({ apiKeyId });
-      toast.success("APIKey deleted successfully");
+      toast({
+        title: "API Key deleted successfully",
+      });
     } catch (error) {
-      toast.error("Failed to delete API Key");
+      toast({
+        title: "Failed to delete API Key",
+      });
     }
   };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success("Copied to clipboard");
+    toast({
+      title: "Copied to clipboard",
+    });
   };
 
   const handleEditApiKey = (apiKeyId: Id<"apiKeys">) => {
@@ -240,14 +250,14 @@ export default function ProjectPage({ params }: { params: { name: string } }) {
                         className={isMobile ? "cursor-pointer" : ""}
                       >
                         <TableCell className="font-mono">
-                          {apiKey.name || apiKey.apiKey.slice(0, 4) + "..."}
-                        </TableCell>
+                          {apiKey.name || "No name"}
+                          </TableCell>
                         <TableCell className="hidden md:table-cell">
                           <Badge variant="secondary">
                             {format(new Date(apiKey.createdAt), "PPP")}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell>   
                           <Badge variant="outline">
                             {apiKey.isServer ? "Server" : "Client"}
                           </Badge>
@@ -299,6 +309,7 @@ export default function ProjectPage({ params }: { params: { name: string } }) {
       </Tabs>
       {selectedApiKey && (
         <EditApiKey
+          projectId={project._id}
           apiKeyId={selectedApiKey}
           apiKeyName={
             apiKeys?.find((ak) => ak._id === selectedApiKey)?.name ?? ""
@@ -337,10 +348,10 @@ export default function ProjectPage({ params }: { params: { name: string } }) {
               variant="outline"
               size="sm"
               onClick={() =>
-                copyToClipboard(selectedApiKeyForDrawer?.apiKey || "")
+                copyToClipboard(selectedApiKeyForDrawer?.apiKey || " No key found")
               }
             >
-              <Copy className="h-4 w-4 mr-2" /> Copy
+              <Copy className="h-4 w-4 mr-2 cursor-pointer" /> Copy
             </Button>
             <Protect
               condition={(has) =>
@@ -360,7 +371,7 @@ export default function ProjectPage({ params }: { params: { name: string } }) {
                   closeDrawer();
                 }}
               >
-                <Pencil className="h-4 w-4 mr-2" /> Edit
+                <Pencil className="h-4 w-4 mr-2 cursor-pointer" /> Edit
               </Button>
             </Protect>
           </DrawerFooter>

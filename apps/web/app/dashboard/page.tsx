@@ -78,7 +78,9 @@ export default function DashboardPage() {
   const handleCloseDialog = useCallback(() => {
     setIsAddProjectDialogOpen(false);
   }, []);
+  let searchType: "project" | "api-key";
 
+  searchType = searchTerm.startsWith("/") ? "project" : "api-key";
   // Update totalPages calculation
   const totalPages = Math.max(2, Math.ceil(totalProjectCount / ITEMS_PER_PAGE));
 
@@ -100,7 +102,10 @@ export default function DashboardPage() {
         </h1>
         <div className="flex items-center justify-between space-x-4 mb-6">
           <div className="flex-grow">
-            <ProjectSearch onSearch={handleSearch} disabled={isLoading} />
+            <ProjectSearch
+              onSearch={handleSearch}
+              disabled={isLoading}
+            />
           </div>
           <Protect
             condition={(has) =>
@@ -148,7 +153,6 @@ export default function DashboardPage() {
                 <Button onClick={() => setIsAddProjectDialogOpen(true)}>
                   Add Project
                 </Button>
-
                 <AddProjectForm
                   isOpen={isAddProjectDialogOpen}
                   onClose={handleCloseDialog}

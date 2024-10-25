@@ -77,7 +77,9 @@ export function DashboardBreadcrumb() {
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <Button variant="default">Open Links</Button>
+        <Button variant="default">
+          <Menu className="w-4 h-4 cursor-pointer" />
+        </Button>
       </DrawerTrigger>
       <DrawerContent>
         <div className="p-4">

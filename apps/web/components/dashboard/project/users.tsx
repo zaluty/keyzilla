@@ -39,33 +39,30 @@ export default function Users({ projectId }: { projectId: Id<"projects"> }) {
     return memberships?.data || [];
   }, [memberships?.data]);
 
-  useEffect(() => {
-    if (isUserLoaded && users !== undefined) {
-      const fetchUsers = async () => {
-        if (!users || users.length === 0) {
-          setIsLoading(false);
-          return;
-        }
+  // Memoize user data to avoid refetching unless projectId or users change
+  const memoizedUserData = useMemo(() => {
+    if (!users || users.length === 0) return [];
+    const fetchUsers = async () => {
+      setIsLoading(true);
+      try {
+        const response = await axios.post(`/api/user?projectId=${projectId}`, {
+          userIds: users,
+        });
+        setUserData(response.data.users);
+        setSelectedUsers(users);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setError(`Failed to fetch user data. Please try again later.`);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchUsers();
+  }, [projectId, users]);
 
-        setIsLoading(true);
-        try {
-          const response = await axios.post(`/api/user?projectId=${projectId}`, {
-            userIds: users,
-          });
-          setUserData(response.data.users);
-          setSelectedUsers(users);
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          setError(`Failed to fetch user data. Please try again later.`);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-      fetchUsers();
-    }
-  }, [projectId, users, isUserLoaded]);
-
-  useEffect(() => {
+  
+  // Memoize selected users to avoid recalculations unless users change
+  const memoizedSelectedUsers = useMemo(() => {
     setTempSelectedUsers(selectedUsers);
   }, [selectedUsers]);
 

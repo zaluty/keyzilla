@@ -29,7 +29,7 @@
     "keys",
     ".env.local"
   ],
-  "author": "hamza (zaluty)",
+  "author": "hamza (zaluty) <github@zaluty.dev>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/zaluty/keyzilla/issues"
