@@ -73,7 +73,6 @@ export function getProjectConfig(): { projectName: string, envType: "org" | "per
   // Extract projectName and envType using regex
   const projectNameMatch = configContent.match(/projectName:\s*["'](.+?)["']/);
   const envTypeMatch = configContent.match(/envType:\s*["'](.+?)["']/);
-  console.log(projectNameMatch, envTypeMatch)
   if (!projectNameMatch || !envTypeMatch) {
     throw new Error('projectName and envType must be defined in the keyzilla.config.ts file');
   }

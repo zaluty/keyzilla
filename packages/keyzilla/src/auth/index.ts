@@ -27,7 +27,6 @@ const envPath = fs.existsSync(path.resolve(process.cwd(), envFile + '.local'))
   ? path.resolve(process.cwd(), envFile + '.local')
   : path.resolve(process.cwd(), envFile);
 
-console.log(`Using environment config: ${envPath}`); // Log which env file is used
 
 dotenv.config({
   path: envPath
@@ -42,7 +41,6 @@ function readConfigFile(): KeyzillaConfig {
 
   // Extract the config object from the file content
   const configMatch = configContent.match(/export\s+const\s+config\s*=\s*Config\s*\(([\s\S]*?)\);/);
-  console.log(configMatch);
   if (configMatch && configMatch[1]) {
     let configString = configMatch[1].trim();
     // Remove non-null assertion operators
@@ -98,12 +96,12 @@ export async function authenticate(production: boolean): Promise<UserData | null
   }
 
   if (!credentials) {
-    console.log("Authentication cancelled.");
+    console.log("Authentication cancelled authenticate first.");
     return null;
   }
 
   const { email, secretCode } = credentials;
-
+  console.log(`Debug: Authenticating with email: ${email} and secret code: ${secretCode}`);
   try {
     const userData = await fetchUserId(email);
     const userId = userData.userId;
@@ -126,7 +124,6 @@ export async function authenticate(production: boolean): Promise<UserData | null
     return null;
   }
 }
-
 async function fetchUserId(email: string): Promise<UserData> {
   console.log(`Fetching user ID for email: ${email}`);
   const response = await fetch(`${BASE_URL}/api/cli?email=${email}`, {
@@ -135,7 +132,7 @@ async function fetchUserId(email: string): Promise<UserData> {
       "Content-Type": "application/json",
     },
   });
-
+ 
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
@@ -162,10 +159,11 @@ async function promptCredentials(): Promise<{
 } | null> {
   const email = await text({
     message: "Please enter your email:",
-    validate: (input) => {
+    validate: (input: string) => {
       if (input.trim() === "") return "Email cannot be empty";
       if (!isValidEmail(input)) return "Please enter a valid email address";
       return undefined;
+      
     },
   });
 
@@ -175,6 +173,8 @@ async function promptCredentials(): Promise<{
 
   const secretCode = await password({
     message: "Please enter your secret code:",
+    mask: "*",
+    
     validate: (input) =>
       input.trim() !== "" ? undefined : "Secret code cannot be empty",
   });
@@ -185,7 +185,7 @@ async function promptCredentials(): Promise<{
 
   return { email: email as string, secretCode: secretCode as string };
 }
-
+ 
 // Helper function to validate email format
 function isValidEmail(email: string): boolean {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -206,7 +206,9 @@ async function verifyUser(
     },
     body: JSON.stringify({ userId, secretKey: secretCode }),
   });
-
+  [
+    "skey\\_ca0325b0bafad11e296215d7ebcbfd44"
+  ]
   if (!response.ok) {
     const errorData = await response.json();
     if (isErrorResponse(errorData)) {
@@ -229,7 +231,7 @@ async function verifyUser(
     return {
       authenticated: true,
       userId: userId,
-      email: "",
+      email: email,
       organizations: organizations,
     } as UserData;
   } else {

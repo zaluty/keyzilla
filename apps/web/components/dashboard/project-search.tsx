@@ -19,7 +19,7 @@ export default function ProjectSearch({
     setSearchTerm(term);
     onSearch(term);
   };
-
+  
   return (
     <div className="relative">
       <Search
@@ -37,3 +37,4 @@ export default function ProjectSearch({
     </div>
   );
 }
+4

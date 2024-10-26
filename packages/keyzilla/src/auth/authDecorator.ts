@@ -1,3 +1,4 @@
+
 import { checkAuthentication } from "./lib/authCache";
 import { authenticate } from "./index"
 

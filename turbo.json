@@ -13,6 +13,10 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "format:write": {
+      "cache": false,
+      "outputs": []
     }
   },
   "globalEnv": [
@@ -24,4 +28,5 @@
     "CLERK_SECRET_KEY",
     "SENTRY_AUTH_TOKEN"
   ]
+  
 }

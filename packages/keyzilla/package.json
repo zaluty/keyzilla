@@ -17,6 +17,7 @@
     "build": "tsup --config tsup.config.ts",
     "build:watch": "tsup --config tsup.config.ts --watch",
     "test": "vitest ",
+    "format:write": "turbo run format:write",
     "lint": "tsc --noEmit ",
     "semantic-release": "semantic-release"
   },

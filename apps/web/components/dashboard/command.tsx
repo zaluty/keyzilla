@@ -120,6 +120,7 @@ export function CommandDialogs() {
               <Home className="mr-2 h-4 w-4" />
               <span>Dashboard</span>
             </CommandItem>
+            
             <CommandItem
               onSelect={() => {
                 router.push("/dashboard/settings"), setOpen(false);

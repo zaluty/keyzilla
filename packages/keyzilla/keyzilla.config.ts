@@ -6,7 +6,7 @@ export const config = Config({
         secretCode: process.env.SECRET_CODE!
     },
     production: {
-        projectName:  "keyzilla",
+        projectName:  "hamza",
         envType:  "org"
     },
 

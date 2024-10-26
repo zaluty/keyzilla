@@ -9,7 +9,6 @@ Keyzilla is a platform for managing API keys and secrets across projects and tea
 - TypeScript support
 - Integration with t3-env for type-safe environment variables
 - Works with Vercel, Railway, Netlify, and other platforms
-
 ## Quick Start
 
 Install:
@@ -36,4 +35,4 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md)
 
 ## License
 
-MIT
+[MIT](./License)
