@@ -94,7 +94,7 @@ describe('authenticate', () => {
           role: 'org:admin',
         },
       ],
-      email: '',
+      email: 'hamzaredone6@gmail.com',
     };
 
     mockFetch.mockResolvedValueOnce({
