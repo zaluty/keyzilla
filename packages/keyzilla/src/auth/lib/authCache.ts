@@ -35,6 +35,7 @@ export function saveAuthCache(userData: UserData): void {
 export function getAuthCache(): UserData | null {
   try {
     const data = fs.readFileSync(getCachePath(), "utf8");
+    console.log(data);
     return JSON.parse(data) as UserData;
   } catch (error) {
     getErrorMessage(error);  
@@ -77,3 +78,5 @@ export async function checkAuthentication(): Promise<UserData | null> {
   }
   return null;
 }
+
+ 

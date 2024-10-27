@@ -133,7 +133,9 @@ export function DropdownMenuDemo({
 
   const handleSignOut = () => {
     router.push("/");
-    signOut();
+    setTimeout(() => {
+      signOut();
+    }, 1000);
   };
 
   return (

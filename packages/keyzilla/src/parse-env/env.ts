@@ -4,7 +4,6 @@ import { ApiKey } from "../types/apikeys";
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
- 
 // Load environment variables from .env.local
 dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
@@ -14,7 +13,6 @@ dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 // it is used to generate the env.ts file
 // the env.ts file is used to type the environment variables
 // ? how about we bundle the env.ts file within the keyzilla dist file and then edit it with the api keys?
- 
 const parseEnv = (apiKeys: ApiKey[]) => {
   const isProd = process.env.NODE_ENV === 'production';
   const envConfig = {
@@ -52,6 +50,13 @@ const parseEnv = (apiKeys: ApiKey[]) => {
       const envValue = process.env[envKey] || key.apiKey;
       return `${envKey}=${envValue}`;
     }).join('\n');
+
+    // Check if the existing content ends with a newline 
+    // gh issue: https://github.com/zaluty/keyzilla/issues/6
+    const currentContent = fs.readFileSync(envLocalPath, 'utf8');
+    if (!currentContent.endsWith('\n')) {
+      fs.appendFileSync(envLocalPath, '\n'); // Ensure there's a newline before appending
+    }
     fs.appendFileSync(envLocalPath, envLocalContent + '\n'); // Append new environment variables
     console.log('Environment variables written to .env.local');
   } catch (error) {

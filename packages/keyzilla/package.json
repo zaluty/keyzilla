@@ -1,6 +1,5 @@
-{
-  "name": "keyzilla",
-  "version": "1.9.1-dev",
+{  "name": "keyzilla",
+  "version": "1.9.2-dev",
   "description": "gain a global access over your api keys ",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -28,7 +27,9 @@
   "keywords": [
     "api",
     "keys",
-    ".env.local"
+    ".env.local",
+    "env",
+    "api-keys"
   ],
   "author": "hamza (zaluty) <github@zaluty.dev>",
   "license": "MIT",

@@ -45,22 +45,25 @@ const tabs = [
   {
     name: "before.ts",
     code: `
-    function before() {
+function before() {
       return Response.json({
         message: "Hello World",
-       apiKey: process.env.KEYZILLA_API_KEY, // no type safety 
+       apiKey: process.env.KEYZILLA_API_KEY!, // no type safety 
         });
     }
     `,
   },
   {
     name: "after.ts",
-    code: ` import { K } from 'keyzilla'
+    code: ` 
+import { K } from 'keyzilla'
 
+function after() {
     return Response.json({
       message: "Hello World",
       apiKey: K.KEYZILLA_API_KEY,
      });
+    }
     `,
   },
 ];
