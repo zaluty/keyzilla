@@ -9,6 +9,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { encrypt } from "@/lib/encryption";
 import {
   Drawer,
   DrawerContent,
@@ -111,7 +112,10 @@ export function AddApiKey({
       }
       await createApiKey({
         projectId: finalProjectId,
-        value: values.apiKey,
+        value: encrypt(
+          values.apiKey,
+          process.env.SOME_KEY as string
+        ),
         isServer: values.isServer,
         name: values.name,
       });
@@ -136,6 +140,7 @@ export function AddApiKey({
           variant: "destructive",
         });
       } else {
+        console.log("Debug: Error creating API Key", error);
         toast({
           title: "Error",
           description: "Failed to create API Key",

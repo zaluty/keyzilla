@@ -38,7 +38,7 @@ import { format } from "date-fns";
 import ImportantNotice from "@/components/dashboard/important-notice";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
-import { z } from "zod";
+import { encrypt, decrypt } from "@/lib/encryption";
 import {
   Drawer,
   DrawerContent,
@@ -103,7 +103,7 @@ export default function ProjectPage({ params }: { params: { name: string } }) {
     try {
       await createApiKey({
         projectId: project._id,
-        value: newApiKey,
+        value: encrypt(newApiKey, process.env.SOME_KEY as string),
         name: newApiKeyName,
       });
       setNewApiKey("");
@@ -112,6 +112,7 @@ export default function ProjectPage({ params }: { params: { name: string } }) {
         title: "API Key created successfully",
       });
     } catch (error) {
+      console.log("Debug: Error creating API Key", error);
       toast({
         title: "Failed to create API Key",
       });
