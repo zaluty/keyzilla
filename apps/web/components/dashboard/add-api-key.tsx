@@ -114,7 +114,7 @@ export function AddApiKey({
         projectId: finalProjectId,
         value: encrypt(
           values.apiKey,
-          process.env.SOME_KEY as string
+          process.env.HASH_KEY as string
         ),
         isServer: values.isServer,
         name: values.name,

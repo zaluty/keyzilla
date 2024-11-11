@@ -4,6 +4,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table"; // Importing Table components
 
 interface CommandShortcutProps {
   isOpen: boolean;
@@ -20,32 +21,23 @@ export default function CommandShorcutsDialog({
         <DialogHeader>
           <DialogTitle>Command Shortcuts</DialogTitle>
         </DialogHeader>
-        <table>
-          <thead>
-            <tr>
-              <th>Action</th>
-              <th>Keyboard Shortcut</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Copy</td>
-              <td>Ctrl + C</td>
-            </tr>
-            <tr>
-              <td>Paste</td>
-              <td>Ctrl + V</td>
-            </tr>
-            <tr>
-              <td>Undo</td>
-              <td>Ctrl + Z</td>
-            </tr>
-            <tr>
-              <td>Redo</td>
-              <td>Ctrl + Y</td>
-            </tr>
-          </tbody>
-        </table>
+        {/* New Table for displaying shortcuts */}
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Shortcut</TableHead>
+              <TableHead>Description</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell>Ctrl || options + K</TableCell>
+              <TableCell>Open Command Palette</TableCell>
+            </TableRow>
+             
+            {/* Add more shortcuts as needed */}
+          </TableBody>
+        </Table>
       </DialogContent>
     </Dialog>
   );

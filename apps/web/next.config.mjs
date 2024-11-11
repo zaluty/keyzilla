@@ -9,6 +9,10 @@ const nextConfig = {
             },
         ],
     },
+    env:{
+        HASH_KEY: process.env.HASH_KEY
+    }
+
 };
 
 export default withSentryConfig(nextConfig, {

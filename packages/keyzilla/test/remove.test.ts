@@ -9,7 +9,7 @@ vi.mock('fs', async () => {
   const originalFs = await vi.importActual('fs');
   return {
     ...originalFs, // Include all original exports
-    readFileSync: vi.fn((path, encoding) => 'const apiKey = process.env.UPSTASH_REDIS_REST_URL;'), // Mock implementation
+    readFileSync: vi.fn((path, encoding) => 'const apiKey = process.env.UPSTASH_REDIS_REST_URL!;'), // Mock implementation
     writeFileSync: vi.fn(),
   };
 });
@@ -36,8 +36,8 @@ describe('removeKeyzilla', () => {
     // Setup mock file content
     vi.mocked(fs.readFileSync).mockImplementation((path, encoding) => {
       console.log(`Reading from ${path}`);
-      if ((path as string).includes('file1.ts')) return 'const apiKey = process.env.UPSTASH_REDIS_REST_URL;';
-      if ((path as string).includes('file2.js')) return 'const apiKey = process.env.UPSTASH_REDIS_REST_URL;';
+      if ((path as string).includes('file1.ts')) return 'const apiKey = process.env.UPSTASH_REDIS_REST_URL!;';
+      if ((path as string).includes('file2.js')) return 'const apiKey = process.env.UPSTASH_REDIS_REST_URL!;';
       return '';
     });
 

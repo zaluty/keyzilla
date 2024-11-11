@@ -48,6 +48,7 @@ import { useParams } from "next/navigation";
 import Feedback from "../feedback";
 import CreateOrganization from "./create-org";
 import { InviteMember } from "./invite-user";
+import { set } from "date-fns";
 export function CommandDialogs() {
   const [open, setOpen] = React.useState(false);
   const [createOrg, setCreateOrg] = React.useState(false);
@@ -63,6 +64,7 @@ export function CommandDialogs() {
     React.useState(false);
   const createProject = useMutation(api.projects.createProject);
   const { organization } = useOrganization();
+ 
   const projects = useQuery(api.projects.getProjects, {
     organizationId: organization?.id || "",
   });
@@ -105,6 +107,7 @@ export function CommandDialogs() {
     setOpen(false);
     setCreateOrg(true);
   };
+ 
   return (
     <>
       <CommandDialog open={open} onOpenChange={setOpen}>

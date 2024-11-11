@@ -20,6 +20,7 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
+import { decrypt, encrypt } from "@/lib/encryption";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -157,7 +158,7 @@ export default function EditApiKey({
                 <FormControl>
                   <Input
                     {...field}
-                    placeholder={apiKey?.apiKey || "enter new API key value"}
+                    placeholder={decrypt(apiKey?.apiKey || "enter new API key value", process.env.HASH_KEY as string).slice(0, 6) || "enter new API key value"}
                     className="mt-1"
                   />
                 </FormControl>

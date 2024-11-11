@@ -48,6 +48,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import { decrypt } from "@/lib/encryption";
 
 export default function Secrets() {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -82,8 +83,14 @@ export default function Secrets() {
   };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success("Copied to clipboard");
+    try{
+
+      text = decrypt(text, process.env.HASH_KEY as string); 
+      navigator.clipboard.writeText(text);
+      toast.success("Copied to clipboard");
+    }catch(err) {
+      console.error("error copying", err);
+    }
   };
 
   const [secretToDelete, setSecretToDelete] = useState<string | null>(null);

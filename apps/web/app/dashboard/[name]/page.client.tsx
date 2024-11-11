@@ -103,7 +103,7 @@ export default function ProjectPage({ params }: { params: { name: string } }) {
     try {
       await createApiKey({
         projectId: project._id,
-        value: encrypt(newApiKey, process.env.SOME_KEY as string),
+        value: encrypt(newApiKey, process.env.HASH_KEY as string),
         name: newApiKeyName,
       });
       setNewApiKey("");
@@ -133,10 +133,15 @@ export default function ProjectPage({ params }: { params: { name: string } }) {
   };
 
   const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast({
-      title: "Copied to clipboard",
-    });
+    try   {
+
+      navigator.clipboard.writeText(decrypt(text, process.env.HASH_KEY as string));
+      toast({
+        title: "Copied to clipboard",
+      });
+    } catch(err) {
+      console.error("error copying", err);
+    }
   };
 
   const handleEditApiKey = (apiKeyId: Id<"apiKeys">) => {
@@ -330,7 +335,7 @@ export default function ProjectPage({ params }: { params: { name: string } }) {
           <div className="p-4 space-y-4">
             <p>
               <strong>API Key:</strong>{" "}
-              {selectedApiKeyForDrawer?.apiKey.slice(0, 4)}...
+              {decrypt(selectedApiKeyForDrawer?.apiKey || "s", process.env.HASH_KEY as string)}...
             </p>
             <p>
               <strong>Created At:</strong>{" "}

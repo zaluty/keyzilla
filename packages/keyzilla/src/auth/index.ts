@@ -18,9 +18,9 @@ import * as dotenv from 'dotenv';
 
 
 // Determine the environment file based on NODE_ENV
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production'
-                : process.env.NODE_ENV === 'test' ? '.env.test'
-                : process.env.VERCEL_ENV === 'preview' ? '.env.preview' // Add this line for Vercel preview
+const envFile = process.env.NODE_ENV! === 'production' ? '.env.production'
+                : process.env.NODE_ENV! === 'test' ? '.env.test'
+                : process.env.VERCEL_ENV! === 'preview' ? '.env.preview' // Add this line for Vercel preview
                 : '.env';
 
 const envPath = fs.existsSync(path.resolve(process.cwd(), envFile + '.local'))
@@ -304,6 +304,6 @@ function getErrorMessage(error: unknown): string {
 
 // Start the authentication process and catch any errors if they occur
 // this is the entry point of the auth process
- authenticate(process.env.NODE_ENV === "production").catch((error) => {
+ authenticate(process.env.NODE_ENV! === "production").catch((error) => {
   console.error("Unexpected error:", error);
 });
